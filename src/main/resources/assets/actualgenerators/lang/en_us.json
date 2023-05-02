@@ -1,6 +1,6 @@
 {
   "creativemodetab.actualgenerators_tab": "Actual Generators",
   "item.actualgenerators.item_pipe": "Item Pipe",
-  "container.item_pipe": "Item Pipe"
-
+  "container.item_pipe_block": "Item Pipe",
+  "block.actualgenerators.item_pipe_block": "Item Pipe"
 }

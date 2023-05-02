@@ -11,4 +11,9 @@ public enum EChannel {
     Purple,
     Cyan,
     Pink,
+    ;
+
+    public EChannel next() {
+        return values()[(ordinal() + 1) % values().length];
+    }
 }

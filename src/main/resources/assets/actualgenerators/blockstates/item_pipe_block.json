@@ -1,0 +1,44 @@
+{
+  "multipart": [
+    {"apply": {
+  "model": "actualgenerators:block/pipe_base"
+}
+    },
+    {"when": {
+  "north": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_north"
+}
+    },
+    {"when": {
+  "east": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_east"
+}
+    },
+    {"when": {
+  "south": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_south"
+}
+    },
+    {"when": {
+  "west": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_west"
+}
+    },
+    {"when": {
+  "bottom": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_down"
+}
+    },
+    {"when": {
+  "top": "true"
+},"apply": {
+  "model": "actualgenerators:block/pipe_up"
+}
+    }
+  ]
+}

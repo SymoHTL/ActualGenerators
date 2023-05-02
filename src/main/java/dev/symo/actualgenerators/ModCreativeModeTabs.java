@@ -1,6 +1,6 @@
 package dev.symo.actualgenerators;
 
-import dev.symo.actualgenerators.item.ModItems;
+import dev.symo.actualgenerators.block.ModBlocks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -16,7 +16,7 @@ public class ModCreativeModeTabs {
     @SubscribeEvent
     public static void registerCreativeModeTabs(CreativeModeTabEvent.Register event) {
         ACTUAL_GENERATORS_TAB = event.registerCreativeModeTab(new ResourceLocation(ActualGenerators.MOD_ID, "actualgenerators_tab"),
-                builder -> builder.icon(() -> new ItemStack(ModItems.ITEM_PIPE.get()))
+                builder -> builder.icon(() -> new ItemStack(ModBlocks.ITEM_PIPE_BLOCK.get()))
                         .title(Component.translatable("creativemodetab.actualgenerators_tab")));
     }
 }

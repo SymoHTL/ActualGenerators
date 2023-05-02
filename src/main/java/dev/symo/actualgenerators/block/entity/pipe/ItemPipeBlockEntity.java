@@ -1,10 +1,10 @@
 package dev.symo.actualgenerators.block.entity.pipe;
 
-import dev.symo.actualgenerators.block.ItemPipeBlock;
-import dev.symo.actualgenerators.block.entity.pipe.config.Connection;
-import dev.symo.actualgenerators.block.entity.pipe.config.DirectionalPosition;
-import dev.symo.actualgenerators.block.entity.pipe.config.EChannel;
-import dev.symo.actualgenerators.block.entity.pipe.config.ERedstoneMode;
+import dev.symo.actualgenerators.block.entity.ModBlockEntities;
+import dev.symo.actualgenerators.block.entity.pipe.config.*;
+import dev.symo.actualgenerators.screen.ItemPipeBlockMenu;
+import dev.symo.actualgenerators.util.DirectionUtil;
+import dev.symo.actualgenerators.util.ItemUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -13,312 +13,425 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider, TickingBlockEntity {
+import static dev.symo.actualgenerators.block.ItemPipeBlock.*;
+
+public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
+    public PipeInput[] inputConnections = new PipeInput[6];
+    public PipeOutput[] outputConnections = new PipeOutput[6];
+    private CompoundTag nbt;
+
     public ItemPipeBlockEntity(BlockPos pos, BlockState state) {
-        super(p_155228_, pos, state);
-        extractingSides = new boolean[Direction.values().length];
-        disconnectedSides = new boolean[Direction.values().length];
+        super(ModBlockEntities.ITEM_PIPE_BLOCK_ENTITY.get(), pos, state);
     }
 
-    private EChannel channel = EChannel.White; // Default channel
-    private ERedstoneMode redstoneMode = ERedstoneMode.Ignored; // Default redstone mode
-    private List<ItemStack> whiteList;
-    private List<ItemStack> blackList;
-    private int priority = 0; // Default priority
+    @Override
+    public @NotNull Component getDisplayName() {
+        return Component.translatable("container.item_pipe_block");
+    }
 
     @Nullable
-    protected List<Connection> connectionCache;
-    @Nullable
-    protected Connection[] extractingConnectionCache;
+    @Override
+    public AbstractContainerMenu createMenu(int id, @NotNull Inventory inventory, @NotNull Player player) {
+        return new ItemPipeBlockMenu(id, inventory, this);
+    }
 
-    protected boolean[] extractingSides;
-    protected boolean[] disconnectedSides;
+    public void onNeighborChange(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighbor, boolean isMoving) {
+        // get the direction of the neighbor
+        Direction direction = DirectionUtil.getFacingDirection(pos, neighbor);
+        // get the block entity of the neighbor
+        BlockEntity neighborBlockEntity = level.getBlockEntity(neighbor);
+        // check if neighbor has Item capability
+        if (neighborBlockEntity != null) {
+            var capability = neighborBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
+            if (capability != null) {
+                // default to output
+                PipeOutput pipeOutput = new PipeOutput(this, neighborBlockEntity, capability, direction, EMode.DISABLED);
+                outputConnections[direction.get3DDataValue()] = pipeOutput;
+            }
+        }
+        updateState(state, level, pos);
+    }
 
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState otherState, boolean bool) {
+        updateState(state, level, pos);
+    }
+
+    public void updateState(BlockState state, Level level, BlockPos pos) {
+        // clear all state
+        state.setValue(NORTH_CONNECTION, false);
+        state.setValue(SOUTH_CONNECTION, false);
+        state.setValue(EAST_CONNECTION, false);
+        state.setValue(WEST_CONNECTION, false);
+        state.setValue(TOP_CONNECTION, false);
+        state.setValue(BOTTOM_CONNECTION, false);
+        state.setValue(UP_TYPE, EConnectionType.CABLE);
+        state.setValue(DOWN_TYPE, EConnectionType.CABLE);
+        state.setValue(NORTH_TYPE, EConnectionType.CABLE);
+        state.setValue(SOUTH_TYPE, EConnectionType.CABLE);
+        state.setValue(EAST_TYPE, EConnectionType.CABLE);
+        state.setValue(WEST_TYPE, EConnectionType.CABLE);
+
+        for (Direction dir : Direction.values()) {
+            var input = inputConnections[dir.get3DDataValue()];
+            var output = outputConnections[dir.get3DDataValue()];
+            PipeIO io = input;
+
+            if (io == null) io = output;
+
+            if (io != null) {
+                switch (dir) {
+                    case UP -> {
+                        state.setValue(TOP_CONNECTION, true);
+                        state.setValue(UP_TYPE, io.Mode.toConnection());
+                    }
+                    case DOWN -> {
+                        state.setValue(BOTTOM_CONNECTION, true);
+                        state.setValue(DOWN_TYPE, io.Mode.toConnection());
+                    }
+                    case NORTH -> {
+                        state.setValue(NORTH_CONNECTION, true);
+                        state.setValue(NORTH_TYPE, io.Mode.toConnection());
+                    }
+                    case SOUTH -> {
+                        state.setValue(SOUTH_CONNECTION, true);
+                        state.setValue(SOUTH_TYPE, io.Mode.toConnection());
+                    }
+                    case EAST -> {
+                        state.setValue(EAST_CONNECTION, true);
+                        state.setValue(EAST_TYPE, io.Mode.toConnection());
+                    }
+                    case WEST -> {
+                        state.setValue(WEST_CONNECTION, true);
+                        state.setValue(WEST_TYPE, io.Mode.toConnection());
+                    }
+                }
+            }
+        }
+
+        level.setBlockAndUpdate(pos, state);
+    }
+
+    @Override
+    public void saveAdditional(@NotNull CompoundTag nbt) {
+        super.saveAdditional(nbt);
+        saveConnections(nbt);
+    }
+
+    public void saveConnections(@NotNull CompoundTag nbt) {
+        var inputConnectionsTag = new CompoundTag();
+        for (int i = 0; i < inputConnections.length; i++) {
+            if (inputConnections[i] != null) {
+                var inputTag = new CompoundTag();
+                inputConnections[i].SaveToNBT(inputTag);
+                inputConnectionsTag.put(String.valueOf(i), inputTag);
+            }
+        }
+        nbt.put("inputConnections", inputConnectionsTag);
+
+        var outputConnectionsTag = new CompoundTag();
+        for (int i = 0; i < outputConnections.length; i++) {
+            if (outputConnections[i] != null) {
+                var outputTag = new CompoundTag();
+                outputConnections[i].SaveToNBT(outputTag);
+                outputConnectionsTag.put(String.valueOf(i), outputTag);
+            }
+        }
+        nbt.put("outputConnections", outputConnectionsTag);
+    }
+
+    public CompoundTag saveConnections() {
+        var nbt = new CompoundTag();
+        var inputConnectionsTag = new CompoundTag();
+        for (int i = 0; i < inputConnections.length; i++) {
+            if (inputConnections[i] != null) {
+                var inputTag = new CompoundTag();
+                inputConnections[i].SaveToNBT(inputTag);
+                inputConnectionsTag.put(String.valueOf(i), inputTag);
+            }
+        }
+        nbt.put("inputConnections", inputConnectionsTag);
+
+        var outputConnectionsTag = new CompoundTag();
+        for (int i = 0; i < outputConnections.length; i++) {
+            if (outputConnections[i] != null) {
+                var outputTag = new CompoundTag();
+                outputConnections[i].SaveToNBT(outputTag);
+                outputConnectionsTag.put(String.valueOf(i), outputTag);
+            }
+        }
+        nbt.put("outputConnections", outputConnectionsTag);
+
+        return nbt;
+    }
+
+    @Override
+    public void load(@NotNull CompoundTag nbt) {
+        super.load(nbt);
+        this.nbt = nbt;
+    }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide) {
+        if (nbt != null) {
+            readConnections(nbt);
+            System.out.println("Loaded" + nbt);
         }
     }
 
-    @Nullable
-    public Connection getExtractingConnection(Direction side) {
-        if (level == null) {
-            return null;
-        }
-        if (extractingConnectionCache == null) {
-            updateExtractingConnectionCache();
-            if (extractingConnectionCache == null) {
-                return null;
+    public void readConnections(@NotNull CompoundTag nbt) {
+        var inputConnectionsTag = nbt.getCompound("inputConnections");
+        for (int i = 0; i < inputConnections.length; i++) {
+            if (inputConnectionsTag.contains(String.valueOf(i))) {
+                var inputTag = inputConnectionsTag.getCompound(String.valueOf(i));
+                inputConnections[i] = PipeInput.LoadFromNBT(inputTag, this);
             }
         }
-        return extractingConnectionCache[side.get3DDataValue()];
-    }
 
-    private void updateExtractingConnectionCache() {
-        BlockState blockState = getBlockState();
-        if (!(blockState.getBlock() instanceof ItemPipeBlock)) {
-            extractingConnectionCache = null;
-            return;
-        }
-
-        extractingConnectionCache = new Connection[Direction.values().length];
-
-        for (Direction direction : Direction.values()) {
-            if (!isExtracting(direction)) {
-                extractingConnectionCache[direction.get3DDataValue()] = null;
-                continue;
+        var outputConnectionsTag = nbt.getCompound("outputConnections");
+        for (int i = 0; i < outputConnections.length; i++) {
+            if (outputConnectionsTag.contains(String.valueOf(i))) {
+                var outputTag = outputConnectionsTag.getCompound(String.valueOf(i));
+                outputConnections[i] = PipeOutput.LoadFromNBT(outputTag, this);
             }
-            extractingConnectionCache[direction.get3DDataValue()] = new Connection(getBlockPos().relative(direction), direction.getOpposite(), 1);
         }
     }
 
-    public boolean isExtracting(Direction side) {
-        return extractingSides[side.get3DDataValue()];
+    public void onRemove() {
     }
 
-    public boolean isExtracting() {
-        for (boolean extract : extractingSides)
-            if (extract)
-                return true;
-        return false;
-    }
+    public void tick(Level level, BlockPos pos, ItemPipeBlockEntity pipe) {
+        if (level.isClientSide()) return;
 
-    @Override
-    public Component getDisplayName() {
-        return Component.translatable("container.item_pipe");
-    }
+        for (PipeInput input : pipe.inputConnections) {
+            if (input == null) continue;
 
-    @Nullable
-    @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        return null;
-    }
-
-    @Override
-    protected void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
-        nbt.putString("channel", channel.name());
-        nbt.putString("whiteList", redstoneMode.name());
-        nbt.putInt("priority", priority);
-        saveItemStackList("whiteList", whiteList, nbt);
-        saveItemStackList("blackList", blackList, nbt);
-    }
-
-    private void saveItemStackList(String key, List<ItemStack> list, CompoundTag nbt) {
-        CompoundTag listNBT = new CompoundTag();
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag itemNBT = new CompoundTag();
-            list.get(i).save(itemNBT);
-            listNBT.put(String.valueOf(i), itemNBT);
-        }
-        nbt.put(key, listNBT);
-    }
-
-    private List<ItemStack> loadItemStackList(String key, CompoundTag nbt) {
-        List<ItemStack> list = new ArrayList<>();
-        CompoundTag listNBT = nbt.getCompound(key);
-        for (String key1 : listNBT.getAllKeys()) {
-            CompoundTag itemNBT = listNBT.getCompound(key1);
-            list.add(ItemStack.of(itemNBT));
-        }
-        return list;
-    }
-
-    @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
-        channel = EChannel.valueOf(nbt.getString("channel"));
-        redstoneMode = ERedstoneMode.valueOf(nbt.getString("redstoneMode"));
-        priority = nbt.getInt("priority");
-        whiteList = loadItemStackList("whiteList", nbt);
-        blackList = loadItemStackList("blackList", nbt);
-    }
-
-
-    @Override
-    public void tick() {
-        for (Direction side : Direction.values()) {
-            Connection extractingConnection = getExtractingConnection(side);
-            if (extractingConnection == null) {
-                continue;
-            }
-            IItemHandler itemHandler = extractingConnection.getItemHandler(level).orElse(null);
-            if (itemHandler == null) {
-                continue;
-            }
-
-            List<Connection> connections = getSortedConnections(side);
-
-            insertOrdered(side, connections, itemHandler);
-        }
-    }
-
-    protected void insertOrdered(Direction side, List<Connection> connections, IItemHandler itemHandler) {
-        int itemsToTransfer = 100;
-
-        ArrayList<ItemStack> nonFittingItems = new ArrayList<>();
-
-        connectionLoop:
-        for (Connection connection : connections) {
-            nonFittingItems.clear();
-            IItemHandler destination = connection.getItemHandler(level).orElse(null);
-            if (destination == null) {
-                continue;
-            }
-            if (isFull(destination)) {
-                continue;
-            }
-            for (int i = 0; i < itemHandler.getSlots(); i++) {
-                if (itemsToTransfer <= 0) {
-                    break connectionLoop;
-                }
-                ItemStack simulatedExtract = itemHandler.extractItem(i, itemsToTransfer, true);
-                if (simulatedExtract.isEmpty()) {
+            if (input.RedstoneMode != ERedstoneMode.Ignored && input.RedstoneMode != ERedstoneMode.AlwaysOn) {
+                int power = level.getBestNeighborSignal(pos);
+                if (input.RedstoneMode == ERedstoneMode.High && power == 0)
                     continue;
-                }
-                if (nonFittingItems.stream().anyMatch(stack -> ItemUtils.isStackable(stack, simulatedExtract))) {
+                else if (input.RedstoneMode == ERedstoneMode.Low && power != 0)
                     continue;
-                }
-                if (canInsert(connection, simulatedExtract, tileEntity.getFilters(side, this)) == tileEntity.getFilterMode(side, this).equals(UpgradeTileEntity.FilterMode.BLACKLIST)) {
-                    continue;
-                }
-                ItemStack stack = ItemHandlerHelper.insertItem(destination, simulatedExtract, false);
-                int insertedAmount = simulatedExtract.getCount() - stack.getCount();
-                if (insertedAmount <= 0) {
-                    nonFittingItems.add(simulatedExtract);
-                }
-                itemsToTransfer -= insertedAmount;
-                itemHandler.extractItem(i, insertedAmount, false);
             }
-        }
-    }
 
-    private boolean isFull(IItemHandler itemHandler) {
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            ItemStack stackInSlot = itemHandler.getStackInSlot(i);
-            if (stackInSlot.getCount() < itemHandler.getSlotLimit(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
+            var endPoints = getEndpoints(level, input, pos);
+            if (endPoints.isEmpty()) continue;
 
 
-    public List<Connection> getSortedConnections(Direction side) {
-        return getConnections().stream().sorted(Comparator.comparingInt(Connection::getDistance)).collect(Collectors.toList());
-    }
-
-    public List<Connection> getConnections() {
-        if (level == null) {
-            return new ArrayList<>();
-        }
-        if (connectionCache == null) {
-            updateConnectionCache();
-            if (connectionCache == null) {
-                return new ArrayList<>();
-            }
-        }
-        return connectionCache;
-    }
-
-    private void updateConnectionCache() {
-        BlockState blockState = getBlockState();
-        if (!(blockState.getBlock() instanceof PipeBlock)) {
-            connectionCache = null;
-            return;
-        }
-        if (!isExtracting()) {
-            connectionCache = null;
-            return;
-        }
-
-        Map<DirectionalPosition, Connection> connections = new HashMap<>();
-
-        Map<BlockPos, Integer> queue = new HashMap<>();
-        List<BlockPos> travelPositions = new ArrayList<>();
-
-        addToQueue(level, worldPosition, queue, travelPositions, connections, 1);
-
-        while (queue.size() > 0) {
-            Map.Entry<BlockPos, Integer> blockPosIntegerEntry = queue.entrySet().stream().findAny().get();
-            addToQueue(level, blockPosIntegerEntry.getKey(), queue, travelPositions, connections, blockPosIntegerEntry.getValue());
-            travelPositions.add(blockPosIntegerEntry.getKey());
-            queue.remove(blockPosIntegerEntry.getKey());
-        }
-
-        connectionCache = new ArrayList<>(connections.values());
-    }
-
-    public boolean isDisconnected(Direction side) {
-        return disconnectedSides[side.get3DDataValue()];
-    }
-
-    public boolean canInsert(Level level, Connection connection) {
-        LazyOptional<?> capability = connection.getCapability(level, ForgeCapabilities.ITEM_HANDLER);
-        if (capability.isPresent()) {
-            return true;
-        }
-        return false;
-    }
-
-    public void addToQueue(Level world, BlockPos position, Map<BlockPos, Integer> queue, List<BlockPos> travelPositions, Map<DirectionalPosition, Connection> insertPositions, int distance) {
-        Block block = world.getBlockState(position).getBlock();
-        if (!(block instanceof ItemPipeBlock)) {
-            return;
-        }
-        ItemPipeBlock pipeBlock = (ItemPipeBlock) block;
-        for (Direction direction : Direction.values()) {
-            if (pipeBlock.isConnected(world, position, direction)) {
-                BlockPos p = position.relative(direction);
-                DirectionalPosition dp = new DirectionalPosition(p, direction.getOpposite());
-                Connection connection = new Connection(dp.getPos(), dp.getDirection(), distance);
-                if (!isExtracting(level, position, direction) && canInsert(level, connection)) {
-                    if (!insertPositions.containsKey(dp)) {
-                        insertPositions.put(dp, connection);
-                    } else {
-                        if (insertPositions.get(dp).getDistance() > distance) {
-                            insertPositions.put(dp, connection);
-                        }
+            switch (input.PlacementStrategy) {
+                case CLOSEST -> {
+                    // sort endpoints by priority then distance
+                    endPoints.sort((a, b) -> {
+                        if (a.Priority == b.Priority) return (int) (a.distance - b.distance);
+                        return b.Priority - a.Priority;
+                    });
+                    moveItems(input, endPoints);
+                }
+                case FURTHEST -> {
+                    // sort endpoints by priority then distance
+                    endPoints.sort((a, b) -> {
+                        if (a.Priority == b.Priority) return (int) (b.distance - a.distance);
+                        return b.Priority - a.Priority;
+                    });
+                    moveItems(input, endPoints);
+                }
+                case ROUND_ROBIN -> {
+                    // sort endpoints by priority
+                    endPoints.sort((a, b) -> b.Priority - a.Priority);
+                    // split moveAmount evenly between endpoints
+                    int moveAmount = input.moveAmount / endPoints.size();
+                    int remainder = input.moveAmount % endPoints.size();
+                    for (PipeOutput output : endPoints) {
+                        ItemUtil.moveItemsAmount(input.fromHandler, output.toHandler, moveAmount);
                     }
-                } else {
-                    if (!travelPositions.contains(p) && !queue.containsKey(p)) {
-                        queue.put(p, distance + 1);
+                    // move remainder to first endpoint
+                    if (remainder > 0) {
+                        ItemUtil.moveItemsAmount(input.fromHandler, endPoints.get(0).toHandler, remainder);
+                    }
+                }
+                case RANDOM -> {
+                    // get random endpoint
+                    int remaining = input.moveAmount;
+                    int safety = 0;
+                    while (remaining > 0) {
+                        int index = level.random.nextInt(endPoints.size());
+                        remaining = ItemUtil.moveItemsAmount(input.fromHandler, endPoints.get(index).toHandler, remaining);
+                        if (safety++ > 10) break;
                     }
                 }
             }
         }
     }
 
-    private boolean isExtracting(Level level, BlockPos pos, Direction direction) {
-        BlockEntity te = level.getBlockEntity(pos);
-        if (te instanceof ItemPipeBlockEntity pipe) {
-            if (pipe.isExtracting(direction)) {
-                return true;
-            }
+    private void moveItems(PipeInput input, List<PipeOutput> endPoints) {
+        int remaining = input.moveAmount;
+        for (PipeOutput endPoint : endPoints) {
+            if (remaining <= 0)
+                return;
+            remaining = ItemUtil.moveItemsAmount(input.fromHandler, endPoint.toHandler, remaining);
         }
-        return false;
     }
 
-    @Override
-    public BlockPos getPos() {
-        return null;
+    private List<PipeOutput> getEndpoints(Level level, PipeInput input, BlockPos pos) {
+        List<PipeOutput> endPoints = new ArrayList<>();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> visited = new HashSet<>();
+        queue.add(pos);
+        visited.add(pos);
+
+        while (!queue.isEmpty()) {
+            BlockPos currentPos = queue.pop();
+            BlockEntity currentEntity = level.getBlockEntity(currentPos);
+            if (currentEntity instanceof ItemPipeBlockEntity currentPipe) {
+                for (PipeOutput output : currentPipe.outputConnections) {
+                    if (output == null) continue;
+                    if (input.Channel != output.Channel) continue;
+                    if (output.Mode != EMode.INSERT && output.Mode != EMode.EXTRACT_INSERT) continue;
+                    //TODO : REDSTONE
+                    endPoints.add(output);
+                }
+                for (Direction direction : Direction.values()) {
+                    BlockPos nextPos = currentPos.relative(direction);
+                    BlockEntity nextEntity = level.getBlockEntity(nextPos);
+                    if (nextEntity instanceof ItemPipeBlockEntity && !visited.contains(nextPos)) {
+                        queue.add(nextPos);
+                        visited.add(nextPos);
+                    }
+                }
+            }
+        }
+        return endPoints;
     }
+
+    public PipeOutput getOutput(Direction direction) {
+        return outputConnections[direction.get3DDataValue()];
+    }
+
+    public PipeInput getInput(Direction direction) {
+        return inputConnections[direction.get3DDataValue()];
+    }
+
+
+    private void setInput(Direction direction, @Nullable PipeInput input, EMode mode) {
+        var blockEntity = Objects.requireNonNull(this.getLevel()).getBlockEntity(this.getBlockPos().relative(direction));
+        if (blockEntity == null) return;
+        var handler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite())
+                .orElse(null);
+        if (handler == null) return;
+        if (input == null)
+            input = new PipeInput(this, blockEntity, handler, direction, mode);
+        else
+            input = new PipeInput(this, blockEntity, handler, direction, input);
+
+        inputConnections[direction.get3DDataValue()] = input;
+    }
+
+    private void setOutput(Direction direction, @Nullable PipeOutput output, EMode mode) {
+        var blockEntity = Objects.requireNonNull(this.getLevel()).getBlockEntity(this.getBlockPos().relative(direction));
+        if (blockEntity == null) return;
+        var handler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
+        if (handler == null) return;
+        if (output == null)
+            output = new PipeOutput(this, blockEntity, handler, direction, mode);
+        else
+            output = new PipeOutput(this, blockEntity, handler, direction, output);
+        outputConnections[direction.get3DDataValue()] = output;
+    }
+
+    public void setMode(Direction direction, EMode mode) {
+        switch (mode) {
+            case EXTRACT -> {
+                var previous = inputConnections[direction.get3DDataValue()];
+                if (previous != null) {
+                    previous.Mode = EMode.EXTRACT;
+                    setInput(direction, previous, null);
+                } else
+                    setInput(direction, null, EMode.EXTRACT);
+                outputConnections[direction.get3DDataValue()] = null;
+            }
+            case INSERT -> {
+                var previous = outputConnections[direction.get3DDataValue()];
+                if (previous != null) {
+                    previous.Mode = EMode.INSERT;
+                    setOutput(direction, previous, null);
+                } else
+                    setOutput(direction, null, EMode.INSERT);
+                inputConnections[direction.get3DDataValue()] = null;
+            }
+            case EXTRACT_INSERT -> {
+                var prevInput = inputConnections[direction.get3DDataValue()];
+                var prevOutput = outputConnections[direction.get3DDataValue()];
+                if (prevInput != null) {
+                    prevInput.Mode = EMode.EXTRACT_INSERT;
+                    setInput(direction, prevInput, null);
+                } else
+                    setInput(direction, null, EMode.EXTRACT_INSERT);
+                if (prevOutput != null) {
+                    prevOutput.Mode = EMode.EXTRACT_INSERT;
+                    setOutput(direction, prevOutput, null);
+                } else
+                    setOutput(direction, null, EMode.EXTRACT_INSERT);
+            }
+            case DISABLED -> {
+                inputConnections[direction.get3DDataValue()] = null;
+                outputConnections[direction.get3DDataValue()] = null;
+            }
+        }
+    }
+
+    public void setPriority(Direction direction, boolean isInput, int priority) {
+        if (isInput) {
+            var input = inputConnections[direction.get3DDataValue()];
+            if (input != null)
+                input.Priority = priority;
+        } else {
+            var output = outputConnections[direction.get3DDataValue()];
+
+            if (output != null)
+                output.Priority = priority;
+        }
+    }
+
+    public void setChannel(Direction direction, boolean isInput, EChannel channel) {
+        if (isInput) {
+            var input = inputConnections[direction.get3DDataValue()];
+            if (input != null)
+                input.Channel = channel;
+        } else {
+            var output = outputConnections[direction.get3DDataValue()];
+            if (output != null)
+                output.Channel = channel;
+        }
+    }
+
+    public void setRedstoneMode(Direction direction, boolean isInput, ERedstoneMode mode) {
+        if (isInput) {
+            var input = inputConnections[direction.get3DDataValue()];
+            if (input != null)
+                input.RedstoneMode = mode;
+        } else {
+            var output = outputConnections[direction.get3DDataValue()];
+            if (output != null)
+                output.RedstoneMode = mode;
+        }
+    }
+
+    public void clearIO() {
+        for (int i = 0; i < 6; i++) {
+            inputConnections[i] = null;
+            outputConnections[i] = null;
+        }
+    }
+
+
 }

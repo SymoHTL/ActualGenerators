@@ -4,6 +4,10 @@ import com.mojang.logging.LogUtils;
 import dev.symo.actualgenerators.block.ModBlocks;
 import dev.symo.actualgenerators.block.entity.ModBlockEntities;
 import dev.symo.actualgenerators.item.ModItems;
+import dev.symo.actualgenerators.net.ModMessages;
+import dev.symo.actualgenerators.screen.ItemPipeBlockScreen;
+import dev.symo.actualgenerators.screen.ModMenuTypes;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +32,8 @@ public class ActualGenerators {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
 
+        ModMenuTypes.register(modEventBus);
+
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -35,16 +41,21 @@ public class ActualGenerators {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-
+        event.enqueueWork(() -> {
+                    ModMessages.register();
+                }
+        );
     }
 
     private void addCreative(CreativeModeTabEvent.BuildContents event) {
-        if(event.getTab() == CreativeModeTabs.INGREDIENTS) {
-            event.accept(ModItems.ITEM_PIPE);
+        if (event.getTab() == CreativeModeTabs.INGREDIENTS) {
+            //event.accept(ModItems.ITEM_PIPE);
+            event.accept(ModBlocks.ITEM_PIPE_BLOCK.get().asItem());
         }
 
-        if(event.getTab() == ModCreativeModeTabs.ACTUAL_GENERATORS_TAB) {
-            event.accept(ModItems.ITEM_PIPE);
+        if (event.getTab() == ModCreativeModeTabs.ACTUAL_GENERATORS_TAB) {
+            //event.accept(ModItems.ITEM_PIPE);
+            event.accept(ModBlocks.ITEM_PIPE_BLOCK.get().asItem());
         }
     }
 
@@ -54,6 +65,8 @@ public class ActualGenerators {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
 
+
+            MenuScreens.register(ModMenuTypes.ITEM_PIPE_BLOCK_MENU.get(), ItemPipeBlockScreen::new);
         }
     }
 }

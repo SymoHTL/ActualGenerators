@@ -20,10 +20,9 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, ActualGenerators.MOD_ID);
 
-    public static final RegistryObject<Block> GEM_INFUSING_STATION = registerBlock("gem_infusing_station",
-            () -> new GemInfusingStationBlock(BlockBehaviour.Properties.of(Material.METAL)
-                    .strength(6f).requiresCorrectToolForDrops().noOcclusion()), ModCreativeModeTabs.ACTUAL_GENERATORS_TAB);
-
+    public static final RegistryObject<Block> ITEM_PIPE_BLOCK = registerBlock("item_pipe_block",
+            () -> new ItemPipeBlock(BlockBehaviour.Properties.of(Material.METAL)
+                    .strength(6f).noOcclusion()), ModCreativeModeTabs.ACTUAL_GENERATORS_TAB);
 
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, CreativeModeTab tab) {
@@ -32,7 +31,7 @@ public class ModBlocks {
         return toReturn;
     }
 
-    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block,                                                                            CreativeModeTab tab) {
+    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block, CreativeModeTab tab) {
         return ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
