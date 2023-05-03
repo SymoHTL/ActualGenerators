@@ -3,11 +3,13 @@ package dev.symo.actualgenerators;
 import com.mojang.logging.LogUtils;
 import dev.symo.actualgenerators.block.ModBlocks;
 import dev.symo.actualgenerators.block.entity.ModBlockEntities;
+import dev.symo.actualgenerators.block.entity.pipe.PipeRenderer;
 import dev.symo.actualgenerators.item.ModItems;
 import dev.symo.actualgenerators.net.ModMessages;
 import dev.symo.actualgenerators.screen.ItemPipeBlockScreen;
 import dev.symo.actualgenerators.screen.ModMenuTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -64,6 +66,8 @@ public class ActualGenerators {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            // register custom renderer
+            BlockEntityRenderers.register(ModBlockEntities.ITEM_PIPE_BLOCK_ENTITY.get(), PipeRenderer::new);
 
 
             MenuScreens.register(ModMenuTypes.ITEM_PIPE_BLOCK_MENU.get(), ItemPipeBlockScreen::new);

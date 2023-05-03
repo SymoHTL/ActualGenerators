@@ -1,7 +1,6 @@
 package dev.symo.actualgenerators.block;
 
 import dev.symo.actualgenerators.block.entity.pipe.ItemPipeBlockEntity;
-import dev.symo.actualgenerators.block.entity.pipe.config.EConnectionType;
 import dev.symo.actualgenerators.block.entity.pipe.config.EMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,8 +19,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -36,69 +33,55 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
 
-    public static final BooleanProperty NORTH_CONNECTION = BooleanProperty.create("north");
-    public static final BooleanProperty SOUTH_CONNECTION = BooleanProperty.create("south");
-    public static final BooleanProperty EAST_CONNECTION = BooleanProperty.create("east");
-    public static final BooleanProperty WEST_CONNECTION = BooleanProperty.create("west");
-    public static final BooleanProperty TOP_CONNECTION = BooleanProperty.create("top");
-    public static final BooleanProperty BOTTOM_CONNECTION = BooleanProperty.create("bottom");
-
-    public static final EnumProperty<EConnectionType> UP_TYPE = EnumProperty.create("up_type", EConnectionType.class);
-    public static final EnumProperty<EConnectionType> DOWN_TYPE = EnumProperty.create("down_type", EConnectionType.class);
-    public static final EnumProperty<EConnectionType> NORTH_TYPE = EnumProperty.create("north_type", EConnectionType.class);
-    public static final EnumProperty<EConnectionType> EAST_TYPE = EnumProperty.create("east_type", EConnectionType.class);
-    public static final EnumProperty<EConnectionType> SOUTH_TYPE = EnumProperty.create("south_type", EConnectionType.class);
-    public static final EnumProperty<EConnectionType> WEST_TYPE = EnumProperty.create("west_type", EConnectionType.class);
-
     //region shape
-    private static final VoxelShape BASE = Block.box(7, 7, 7, 8.75, 8.75, 8.75);
+    public static final VoxelShape BASE = Block.box(7, 7, 7, 8.75, 8.75, 8.75);
     //region north
-    private static final VoxelShape NORTH_PIPE = Block.box(7.125, 7.125, 0.5, 8.625, 8.625, 7);
-    private static final VoxelShape NORTH_PLANE_1 = Block.box(6, 6, 0.5, 9.75, 9.75, 0.7);
-    private static final VoxelShape NORTH_PLANE_2 = Block.box(4.25, 4.25, 0, 11.5, 11.5, 0.3);
-    private static final VoxelShape NORTH_PLANE_3 = Block.box(5, 5, 0.3, 10.75, 10.75, 0.5);
+    public static final VoxelShape NORTH_PIPE = Block.box(7.125, 7.125, 0, 8.625, 8.625, 7.25);
+    public static final VoxelShape NORTH_PLANE_1 = Block.box(6, 6, 0.5, 9.75, 9.75, 0.7);
+    public static final VoxelShape NORTH_PLANE_2 = Block.box(4.25, 4.25, 0, 11.5, 11.5, 0.3);
+    public static final VoxelShape NORTH_PLANE_3 = Block.box(5, 5, 0.3, 10.75, 10.75, 0.5);
 
-    private static final VoxelShape NORTH = join(NORTH_PIPE, NORTH_PLANE_1, NORTH_PLANE_2, NORTH_PLANE_3);
+    public static final VoxelShape NORTH = join(NORTH_PIPE, NORTH_PLANE_1, NORTH_PLANE_2, NORTH_PLANE_3);
     //endregion
 
     //region south
-    private static final VoxelShape SOUTH_PIPE = Block.box(7.125, 7.125, 8.5, 8.625, 8.625, 15.3);
-    private static final VoxelShape SOUTH_PLANE_1 = Block.box(6, 6, 15.3, 9.75, 9.75, 15.5);
-    private static final VoxelShape SOUTH_PLANE_2 = Block.box(4.25, 4.25, 15.7, 11.5, 11.5, 16);
-    private static final VoxelShape SOUTH_PLANE_3 = Block.box(5, 5, 15.5, 10.75, 10.75, 15.7);
-    private static final VoxelShape SOUTH = join(SOUTH_PIPE, SOUTH_PLANE_1, SOUTH_PLANE_2, SOUTH_PLANE_3);
+    public static final VoxelShape SOUTH_PIPE = Block.box(7.125, 7.125, 8.75, 8.625, 8.625, 16);
+    public static final VoxelShape SOUTH_PLANE_1 = Block.box(6, 6, 15.3, 9.75, 9.75, 15.5);
+    public static final VoxelShape SOUTH_PLANE_2 = Block.box(4.25, 4.25, 15.7, 11.5, 11.5, 16);
+    public static final VoxelShape SOUTH_PLANE_3 = Block.box(5, 5, 15.5, 10.75, 10.75, 15.7);
+    public static final VoxelShape SOUTH = join(SOUTH_PIPE, SOUTH_PLANE_1, SOUTH_PLANE_2, SOUTH_PLANE_3);
     //endregion
 
     //region east
-    private static final VoxelShape EAST_PIPE = Block.box(8.75, 7.125, 7.125, 15.55, 8.625, 8.625);
-    private static final VoxelShape EAST_PLANE_1 = Block.box(15.55, 6, 6, 15.75, 9.75, 9.75);
-    private static final VoxelShape EAST_PLANE_2 = Block.box(15.70, 6, 6, 15.75, 9.75, 9.75); // TODO ERROR
-    private static final VoxelShape EAST_PLANE_3 = Block.box(15.75, 5, 5, 15.95, 10.75, 10.75);
-    private static final VoxelShape EAST = join(EAST_PIPE, EAST_PLANE_1, EAST_PLANE_2, EAST_PLANE_3);
+    public static final VoxelShape EAST_PIPE = Block.box(8.75, 7.125, 7.125, 16, 8.625, 8.625);
+    public static final VoxelShape EAST_PLANE_1 = Block.box(15.55, 6, 6, 15.75, 9.75, 9.75);
+    public static final VoxelShape EAST_PLANE_2 = Block.box(15.70, 6, 6, 15.75, 9.75, 9.75); // TODO ERROR
+    public static final VoxelShape EAST_PLANE_3 = Block.box(15.75, 5, 5, 15.95, 10.75, 10.75);
+    public static final VoxelShape EAST = join(EAST_PIPE, EAST_PLANE_1, EAST_PLANE_2, EAST_PLANE_3);
     //endregion
 
     //region west
-    private static final VoxelShape WEST_PIPE = Block.box(0.5, 7.125, 7.125, 7.3, 8.625, 8.625);
-    private static final VoxelShape WEST_PLANE_1 = Block.box(0.5, 6, 6, 0.7, 9.75, 9.75);
-    private static final VoxelShape WEST_PLANE_2 = Block.box(0, 4.25, 4.25, 0.3, 11.5, 11.5);
-    private static final VoxelShape WEST_PLANE_3 = Block.box(0.3, 5, 5, 0.5, 10.75, 10.75);
-    private static final VoxelShape WEST = join(WEST_PIPE, WEST_PLANE_1, WEST_PLANE_2, WEST_PLANE_3);
+    public static final VoxelShape WEST_PIPE = Block.box(0, 7.125, 7.125, 7.25, 8.625, 8.625);
+    public static final VoxelShape WEST_PLANE_1 = Block.box(0.5, 6, 6, 0.7, 9.75, 9.75);
+    public static final VoxelShape WEST_PLANE_2 = Block.box(0, 4.25, 4.25, 0.3, 11.5, 11.5);
+    public static final VoxelShape WEST_PLANE_3 = Block.box(0.3, 5, 5, 0.5, 10.75, 10.75);
+    public static final VoxelShape WEST = join(WEST_PIPE, WEST_PLANE_1, WEST_PLANE_2, WEST_PLANE_3);
     //endregion
 
     //region top
-    private static final VoxelShape TOP_PIPE = Block.box(7.125, 8.7, 7.125, 8.625, 15.4, 8.625);
-    private static final VoxelShape TOP_PLANE_1 = Block.box(6, 15.3, 6, 9.75, 15.55, 9.75);
-    private static final VoxelShape TOP_PLANE_2 = Block.box(4.25, 15.7, 4.25, 11.5, 16, 11.5);
-    private static final VoxelShape TOP_PLANE_3 = Block.box(5, 15.5, 5, 10.75, 15.7, 10.75);
-    private static final VoxelShape TOP = join(TOP_PIPE, TOP_PLANE_1, TOP_PLANE_2, TOP_PLANE_3);
+    public static final VoxelShape TOP_PIPE = Block.box(7.125, 8.75, 7.125, 8.625, 16, 8.625);
+    public static final VoxelShape TOP_PLANE_1 = Block.box(6, 15.3, 6, 9.75, 15.55, 9.75);
+    public static final VoxelShape TOP_PLANE_2 = Block.box(4.25, 15.7, 4.25, 11.5, 16, 11.5);
+    public static final VoxelShape TOP_PLANE_3 = Block.box(5, 15.5, 5, 10.75, 15.7, 10.75);
+    public static final VoxelShape TOP = join(TOP_PIPE, TOP_PLANE_1, TOP_PLANE_2, TOP_PLANE_3);
     //endregion
 
     //region bottom
-    private static final VoxelShape BOTTOM_PIPE = Block.box(7.125, 0.5, 7.125, 8.625, 7, 8.625);
-    private static final VoxelShape BOTTOM_PLANE_1 = Block.box(6, 0.5, 6, 9.75, 0.7, 9.75);
-    private static final VoxelShape BOTTOM_PLANE_2 = Block.box(4.25, 0, 4.25, 11.5, 0.3, 11.5);
-    private static final VoxelShape BOTTOM_PLANE_3 = Block.box(5, 0.3, 5, 10.75, 0.5, 10.75);
-    private static final VoxelShape BOTTOM = join(BOTTOM_PIPE, BOTTOM_PLANE_1, BOTTOM_PLANE_2, BOTTOM_PLANE_3);
+    public static final VoxelShape BOTTOM_PIPE = Block.box(7.125, 0, 7.125, 8.625, 7.25, 8.625);
+    public static final VoxelShape BOTTOM_PLANE_1 = Block.box(6, 0.5, 6, 9.75, 0.7, 9.75);
+    public static final VoxelShape BOTTOM_PLANE_2 = Block.box(4.25, 0, 4.25, 11.5, 0.3, 11.5);
+    public static final VoxelShape BOTTOM_PLANE_3 = Block.box(5, 0.3, 5, 10.75, 0.5, 10.75);
+    public static final VoxelShape BOTTOM = join(BOTTOM_PIPE, BOTTOM_PLANE_1, BOTTOM_PLANE_2, BOTTOM_PLANE_3);
     //endregion
 
     //endregion
@@ -114,20 +97,7 @@ public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
 
     public ItemPipeBlock(Properties properties) {
         super(properties);
-        registerDefaultState(
-                stateDefinition.any()
-                        .setValue(NORTH_CONNECTION, false)
-                        .setValue(SOUTH_CONNECTION, false)
-                        .setValue(EAST_CONNECTION, false)
-                        .setValue(WEST_CONNECTION, false)
-                        .setValue(TOP_CONNECTION, false)
-                        .setValue(BOTTOM_CONNECTION, false)
-                        .setValue(UP_TYPE, EConnectionType.CABLE)
-                        .setValue(DOWN_TYPE, EConnectionType.CABLE)
-                        .setValue(NORTH_TYPE, EConnectionType.CABLE)
-                        .setValue(SOUTH_TYPE, EConnectionType.CABLE)
-                        .setValue(EAST_TYPE, EConnectionType.CABLE)
-                        .setValue(WEST_TYPE, EConnectionType.CABLE));
+        registerDefaultState(stateDefinition.any());
     }
 
     @Nullable
@@ -145,12 +115,6 @@ public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
                 itemPipe.tick(level1, blockPos, itemPipe);
             }
         };
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(NORTH_CONNECTION, SOUTH_CONNECTION, EAST_CONNECTION, WEST_CONNECTION, TOP_CONNECTION,
-                BOTTOM_CONNECTION, UP_TYPE, DOWN_TYPE, NORTH_TYPE, SOUTH_TYPE, EAST_TYPE, WEST_TYPE);
     }
 
     @Override
@@ -184,7 +148,7 @@ public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
         super.neighborChanged(state, level, pos, block, neighborPos, isMoving);
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof ItemPipeBlockEntity itemPipe)
-            itemPipe.onNeighborChange(state,level,pos,block,neighborPos,isMoving);
+            itemPipe.onNeighborChange(state, level, pos, block, neighborPos, isMoving);
     }
 
     //@Override
@@ -203,53 +167,15 @@ public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof ItemPipeBlockEntity itemPipe)
             itemPipe.onPlace(state, level, pos, otherState, bool);
+
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        boolean north = state.getValue(NORTH_CONNECTION);
-        boolean south = state.getValue(SOUTH_CONNECTION);
-        boolean east = state.getValue(EAST_CONNECTION);
-        boolean west = state.getValue(WEST_CONNECTION);
-        boolean top = state.getValue(TOP_CONNECTION);
-        boolean bottom = state.getValue(BOTTOM_CONNECTION);
         VoxelShape shape = BASE;
-        if (west) shape = Shapes.join(shape, WEST, BooleanOp.OR);
-        if (east) shape = Shapes.join(shape, EAST, BooleanOp.OR);
-        if (north) shape = Shapes.join(shape, NORTH, BooleanOp.OR);
-        if (south) shape = Shapes.join(shape, SOUTH, BooleanOp.OR);
-        if (bottom) shape = Shapes.join(shape, BOTTOM, BooleanOp.OR);
-        if (top) shape = Shapes.join(shape, TOP, BooleanOp.OR);
-
+        if (world.getBlockEntity(pos) instanceof ItemPipeBlockEntity itemPipe)
+            return itemPipe.getShape(shape);
         return shape;
-    }
-
-    public void updateConnections(Level level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-        state = state.setValue(NORTH_CONNECTION, false);
-        state = state.setValue(SOUTH_CONNECTION, false);
-        state = state.setValue(EAST_CONNECTION, false);
-        state = state.setValue(WEST_CONNECTION, false);
-        state = state.setValue(TOP_CONNECTION, false);
-        state = state.setValue(BOTTOM_CONNECTION, false);
-
-        for (Direction direction : Direction.values()) {
-            BlockEntity neighborBlockEntity = level.getBlockEntity(pos.relative(direction));
-            if (neighborBlockEntity != null && neighborBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).isPresent()
-                    || neighborBlockEntity instanceof ItemPipeBlockEntity) {
-                switch (direction) {
-                    case NORTH -> state = state.setValue(NORTH_CONNECTION, true);
-                    case SOUTH -> state = state.setValue(SOUTH_CONNECTION, true);
-                    case EAST -> state = state.setValue(EAST_CONNECTION, true);
-                    case WEST -> state = state.setValue(WEST_CONNECTION, true);
-                    case UP -> state = state.setValue(TOP_CONNECTION, true);
-                    case DOWN -> state = state.setValue(BOTTOM_CONNECTION, true);
-                    default -> throw new IllegalArgumentException();
-                }
-            }
-        }
-
-        level.setBlockAndUpdate(pos, state);
     }
 
     @Override
@@ -268,27 +194,27 @@ public class ItemPipeBlock extends BaseEntityBlock implements IForgeBlock {
         Vec3 localHitVec = hitVec.subtract(pos.getX(), pos.getY(), pos.getZ());
         if (shape.bounds().contains(localHitVec)) {
             Direction direction;
-            if (NORTH.bounds().contains(localHitVec) && state.getValue(NORTH_CONNECTION)) {
+            if (NORTH.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.NORTH);
                 direction = Direction.NORTH;
-            } else if (SOUTH.bounds().contains(localHitVec) && state.getValue(SOUTH_CONNECTION)) {
+            } else if (SOUTH.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.SOUTH);
                 direction = Direction.SOUTH;
-            } else if (EAST.bounds().contains(localHitVec) && state.getValue(EAST_CONNECTION)) {
+            } else if (EAST.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.EAST);
                 direction = Direction.EAST;
-            } else if (WEST.bounds().contains(localHitVec) && state.getValue(WEST_CONNECTION)) {
+            } else if (WEST.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.WEST);
                 direction = Direction.WEST;
-            } else if (TOP.bounds().contains(localHitVec) && state.getValue(TOP_CONNECTION)) {
+            } else if (TOP.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.UP);
                 direction = Direction.UP;
-            } else if (BOTTOM.bounds().contains(localHitVec) && state.getValue(BOTTOM_CONNECTION)) {
+            } else if (BOTTOM.bounds().contains(localHitVec)) {
                 if (player.isShiftKeyDown())
                     switchMode(itemPipe, Direction.DOWN);
                 direction = Direction.DOWN;

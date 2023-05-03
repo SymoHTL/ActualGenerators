@@ -1,0 +1,22 @@
+{
+  "credit": "Made with Blockbench",
+  "textures": {
+    "0": "actualgenerators:block/pipe_base",
+    "particle": "actualgenerators:block/pipe_base"
+  },
+  "elements": [
+    {
+      "name": "North",
+      "from": [7.125, 7.125, 0],
+      "to": [8.625, 8.625, 7.25],
+      "faces": {
+        "north": {"uv": [4, 4, 5.5, 5.5], "texture": "#0"},
+        "east": {"uv": [0, 0, 6.5, 1.5], "texture": "#0"},
+        "south": {"uv": [4, 6, 5.5, 7.5], "texture": "#0"},
+        "west": {"uv": [0, 2, 6.5, 3.5], "texture": "#0"},
+        "up": {"uv": [1.71875, 7.25, 0.21875, 0.75], "texture": "#0"},
+        "down": {"uv": [3.5, 0.53125, 2, 7.03125], "texture": "#0"}
+      }
+    }
+  ]
+}

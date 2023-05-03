@@ -17,6 +17,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +31,7 @@ import static dev.symo.actualgenerators.block.ItemPipeBlock.*;
 public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
     public PipeInput[] inputConnections = new PipeInput[6];
     public PipeOutput[] outputConnections = new PipeOutput[6];
+    public EConnectionType[] connectionTypes = new EConnectionType[6];
     private CompoundTag nbt;
 
     public ItemPipeBlockEntity(BlockPos pos, BlockState state) {
@@ -57,16 +61,68 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
                 // default to output
                 PipeOutput pipeOutput = new PipeOutput(this, neighborBlockEntity, capability, direction, EMode.DISABLED);
                 outputConnections[direction.get3DDataValue()] = pipeOutput;
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.OUTPUT;
+            } else if (neighborBlockEntity instanceof ItemPipeBlockEntity pipe) {
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.CABLE;
             }
         }
-        updateState(state, level, pos);
+        for (EConnectionType conn : connectionTypes){
+            System.out.println(conn);
+        }
+        //updateState(state, level, pos);
     }
 
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState otherState, boolean bool) {
-        updateState(state, level, pos);
+        //updateState(state, level, pos);
     }
 
-    public void updateState(BlockState state, Level level, BlockPos pos) {
+    public VoxelShape getShape(VoxelShape shape) {
+        for (Direction dir : Direction.values()) {
+            var conn = connectionTypes[dir.get3DDataValue()];
+            if (conn == null) continue;
+            switch (dir) {
+                case DOWN -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, BOTTOM_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, BOTTOM, BooleanOp.OR);
+                    }
+                }
+                case UP -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, TOP_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, TOP, BooleanOp.OR);
+                    }
+                }
+                case NORTH -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, NORTH_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, NORTH, BooleanOp.OR);
+                    }
+                }
+                case SOUTH -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, SOUTH_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, SOUTH, BooleanOp.OR);
+                    }
+                }
+                case WEST -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, WEST_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, WEST, BooleanOp.OR);
+                    }
+                }
+                case EAST -> {
+                    switch (conn) {
+                        case CABLE -> Shapes.join(shape, EAST_PIPE, BooleanOp.OR);
+                        case INPUT, OUTPUT, BOTH -> Shapes.join(shape, EAST, BooleanOp.OR);
+                    }
+                }
+            }
+        }
+        return shape;
+    }
+
+    /*public void updateState(BlockState state, Level level, BlockPos pos) {
         // clear all state
         state.setValue(NORTH_CONNECTION, false);
         state.setValue(SOUTH_CONNECTION, false);
@@ -119,7 +175,7 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
         }
 
         level.setBlockAndUpdate(pos, state);
-    }
+    }*/
 
     @Override
     public void saveAdditional(@NotNull CompoundTag nbt) {
@@ -183,10 +239,8 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     public void onLoad() {
         super.onLoad();
-        if (nbt != null) {
+        if (nbt != null)
             readConnections(nbt);
-            System.out.println("Loaded" + nbt);
-        }
     }
 
     public void readConnections(@NotNull CompoundTag nbt) {
@@ -358,6 +412,7 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
                 } else
                     setInput(direction, null, EMode.EXTRACT);
                 outputConnections[direction.get3DDataValue()] = null;
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.INPUT;
             }
             case INSERT -> {
                 var previous = outputConnections[direction.get3DDataValue()];
@@ -367,6 +422,7 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
                 } else
                     setOutput(direction, null, EMode.INSERT);
                 inputConnections[direction.get3DDataValue()] = null;
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.OUTPUT;
             }
             case EXTRACT_INSERT -> {
                 var prevInput = inputConnections[direction.get3DDataValue()];
@@ -381,10 +437,12 @@ public class ItemPipeBlockEntity extends BlockEntity implements MenuProvider {
                     setOutput(direction, prevOutput, null);
                 } else
                     setOutput(direction, null, EMode.EXTRACT_INSERT);
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.BOTH;
             }
             case DISABLED -> {
                 inputConnections[direction.get3DDataValue()] = null;
                 outputConnections[direction.get3DDataValue()] = null;
+                connectionTypes[direction.get3DDataValue()] = EConnectionType.NONE;
             }
         }
     }
