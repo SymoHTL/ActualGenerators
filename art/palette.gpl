@@ -1,0 +1,78 @@
+GIMP Palette
+Name: Actual Generators
+Columns: 5
+# Shared palette for all Actual Generators textures.
+# Load in Aseprite: Palette menu > Load Palette. Also readable by Pixelorama,
+# LibreSprite, GIMP and Blockbench.
+#
+# Ten ramps of five shades, dark to light. Light comes from the upper left:
+# lightest shade top-left, darkest bottom-right, outline in the ramp's darkest.
+# Stay inside these ramps so machines read as one family; add a ramp rather
+# than a stray colour.
+#
+# --- Casing: the default machine chassis ---
+ 26  29  36	Casing 1
+ 45  51  62	Casing 2
+ 66  74  88	Casing 3
+ 92 102 118	Casing 4
+124 136 153	Casing 5
+# --- Trim: frames, bolts, panel edges ---
+ 38  36  38	Trim 1
+ 64  61  62	Trim 2
+ 92  88  89	Trim 3
+122 118 118	Trim 4
+156 152 151	Trim 5
+# --- Nickel ---
+ 74  70  62	Nickel 1
+110 105  93	Nickel 2
+148 143 128	Nickel 3
+186 181 166	Nickel 4
+219 216 204	Nickel 5
+# --- Lead ---
+ 33  36  46	Lead 1
+ 52  57  71	Lead 2
+ 74  80  96	Lead 3
+ 99 106 122	Lead 4
+131 138 154	Lead 5
+# --- Silver ---
+ 84  92 104	Silver 1
+122 132 145	Silver 2
+160 171 183	Silver 3
+199 208 218	Silver 4
+232 238 244	Silver 5
+# --- Copper: Corrosion Cell, coils, wiring ---
+ 92  45  28	Copper 1
+138  71  41	Copper 2
+184 105  61	Copper 3
+216 143  92	Copper 4
+235 179 130	Copper 5
+# --- Verdigris: weathered copper stages ---
+ 32  74  62	Verdigris 1
+ 46 105  86	Verdigris 2
+ 66 139 112	Verdigris 3
+ 94 172 141	Verdigris 4
+130 200 170	Verdigris 5
+# --- Flux: FE energy accent, glowing bars, Flux Crystals ---
+ 10  48  70	Flux 1
+ 16  88 128	Flux 2
+ 26 138 190	Flux 3
+ 62 194 236	Flux 4
+146 236 255	Flux 5
+# --- Heat: geothermal, combustion, danger states ---
+ 74  20  14	Heat 1
+128  40  20	Heat 2
+186  74  28	Heat 3
+228 122  44	Heat 4
+250 180  84	Heat 5
+# --- Void: End-tier and endgame content ---
+ 40  20  60	Void 1
+ 64  34  92	Void 2
+ 96  56 132	Void 3
+132  88 172	Void 4
+176 138 212	Void 5
+# --- Gold: precious metal, gilded machine parts ---
+ 92  64  10	Gold 1
+140 102  20	Gold 2
+196 152  36	Gold 3
+232 196  76	Gold 4
+250 232 150	Gold 5
