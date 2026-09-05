@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/copper"
+    },
+    "O": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "OIO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:energy_upgrade"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/resonance_crusher_bottom",
+    "front": "actualgenerators:block/resonance_crusher_front",
+    "side": "actualgenerators:block/resonance_crusher_side",
+    "top": "actualgenerators:block/resonance_crusher_top"
+  }
+}

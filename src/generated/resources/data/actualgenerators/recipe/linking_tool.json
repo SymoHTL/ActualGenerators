@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "tag": "c:gems/amethyst"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "I I",
+    " I ",
+    " A "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:linking_tool"
+  }
+}

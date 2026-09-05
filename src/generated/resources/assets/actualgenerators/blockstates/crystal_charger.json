@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/crystal_charger",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/crystal_charger"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/crystal_charger",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/crystal_charger",
+      "y": 270
+    }
+  }
+}

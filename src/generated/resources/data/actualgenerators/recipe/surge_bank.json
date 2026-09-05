@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": {
+      "item": "minecraft:copper_block"
+    },
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "pattern": [
+    " R ",
+    "CFC",
+    " R "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:surge_bank"
+  }
+}

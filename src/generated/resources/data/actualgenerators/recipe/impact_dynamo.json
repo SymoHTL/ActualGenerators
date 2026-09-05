@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    }
+  },
+  "pattern": [
+    " P ",
+    "IFI",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:impact_dynamo"
+  }
+}

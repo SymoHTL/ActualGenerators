@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "M": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    " M ",
+    "MCM",
+    " M "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:iron_tier_upgrade"
+  }
+}

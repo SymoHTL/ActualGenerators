@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_block"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "R": {
+      "item": "actualgenerators:link_range_upgrade"
+    }
+  },
+  "pattern": [
+    " E ",
+    "ARA",
+    " E "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:unbound_link_card"
+  }
+}

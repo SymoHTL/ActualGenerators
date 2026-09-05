@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/energy_injector_bottom",
+    "front": "actualgenerators:block/energy_injector_front",
+    "side": "actualgenerators:block/energy_injector_side",
+    "top": "actualgenerators:block/energy_injector_top"
+  }
+}

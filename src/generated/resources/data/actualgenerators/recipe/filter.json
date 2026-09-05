@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:paper"
+    },
+    "O": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "OIO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:filter"
+  }
+}

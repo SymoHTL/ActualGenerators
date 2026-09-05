@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_range_upgrade": {
+      "conditions": {
+        "items": [
+          {
+            "items": "actualgenerators:link_range_upgrade"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "actualgenerators:unbound_link_card"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_range_upgrade"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "actualgenerators:unbound_link_card"
+    ]
+  }
+}

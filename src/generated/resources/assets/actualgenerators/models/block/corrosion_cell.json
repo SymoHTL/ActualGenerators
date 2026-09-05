@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/corrosion_cell_bottom",
+    "front": "actualgenerators:block/corrosion_cell_front",
+    "side": "actualgenerators:block/corrosion_cell_side",
+    "top": "actualgenerators:block/corrosion_cell_top"
+  }
+}

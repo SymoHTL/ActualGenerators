@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/spawner_siphon_bottom",
+    "front": "actualgenerators:block/spawner_siphon_front",
+    "side": "actualgenerators:block/spawner_siphon_side",
+    "top": "actualgenerators:block/spawner_siphon_top"
+  }
+}

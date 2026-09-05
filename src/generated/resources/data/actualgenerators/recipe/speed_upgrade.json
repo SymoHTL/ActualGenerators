@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/gold"
+    },
+    "O": {
+      "item": "minecraft:sugar"
+    }
+  },
+  "pattern": [
+    "OIO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:speed_upgrade"
+  }
+}

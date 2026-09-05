@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:dusts/redstone"
+    },
+    "O": {
+      "item": "minecraft:paper"
+    }
+  },
+  "pattern": [
+    "OIO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:config_card"
+  }
+}

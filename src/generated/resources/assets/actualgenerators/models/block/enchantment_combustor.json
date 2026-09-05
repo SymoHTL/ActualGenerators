@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/enchantment_combustor_bottom",
+    "front": "actualgenerators:block/enchantment_combustor_front",
+    "side": "actualgenerators:block/enchantment_combustor_side",
+    "top": "actualgenerators:block/enchantment_combustor_top"
+  }
+}

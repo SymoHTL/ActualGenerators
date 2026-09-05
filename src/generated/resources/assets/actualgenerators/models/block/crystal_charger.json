@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/crystal_charger_bottom",
+    "front": "actualgenerators:block/crystal_charger_front",
+    "side": "actualgenerators:block/crystal_charger_side",
+    "top": "actualgenerators:block/crystal_charger_top"
+  }
+}

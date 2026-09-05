@@ -1,0 +1,10 @@
+{
+  "type": "actualgenerators:crushing",
+  "ingredient": {
+    "tag": "c:ores/copper"
+  },
+  "result": {
+    "count": 3,
+    "id": "actualgenerators:copper_dust"
+  }
+}

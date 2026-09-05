@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    " G ",
+    "IFI",
+    " G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:hydrostatic_generator"
+  }
+}

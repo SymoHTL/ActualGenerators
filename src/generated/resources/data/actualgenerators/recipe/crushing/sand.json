@@ -1,0 +1,11 @@
+{
+  "type": "actualgenerators:crushing",
+  "ingredient": {
+    "item": "minecraft:gravel"
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:sand"
+  },
+  "ticks": 40
+}

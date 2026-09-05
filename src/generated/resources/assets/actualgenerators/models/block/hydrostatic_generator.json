@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/hydrostatic_generator_bottom",
+    "front": "actualgenerators:block/hydrostatic_generator_front",
+    "side": "actualgenerators:block/hydrostatic_generator_side",
+    "top": "actualgenerators:block/hydrostatic_generator_top"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/spawner_siphon",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/spawner_siphon"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/spawner_siphon",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/spawner_siphon",
+      "y": 270
+    }
+  }
+}

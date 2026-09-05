@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "actualgenerators:iron_tier_upgrade"
+    },
+    "M": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "pattern": [
+    " M ",
+    "MCM",
+    " M "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:gold_tier_upgrade"
+  }
+}

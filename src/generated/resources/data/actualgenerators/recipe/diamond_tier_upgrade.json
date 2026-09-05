@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "actualgenerators:gold_tier_upgrade"
+    },
+    "M": {
+      "tag": "c:gems/diamond"
+    }
+  },
+  "pattern": [
+    " M ",
+    "MCM",
+    " M "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:diamond_tier_upgrade"
+  }
+}

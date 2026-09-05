@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "L": {
+      "tag": "c:gems/lapis"
+    }
+  },
+  "pattern": [
+    " B ",
+    "LFL",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:enchantment_combustor"
+  }
+}

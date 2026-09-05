@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_frame": {
+      "conditions": {
+        "items": [
+          {
+            "items": "actualgenerators:machine_frame"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "actualgenerators:enchantment_combustor"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_frame"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "actualgenerators:enchantment_combustor"
+    ]
+  }
+}

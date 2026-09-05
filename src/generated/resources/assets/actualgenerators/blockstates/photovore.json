@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/photovore",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/photovore"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/photovore",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/photovore",
+      "y": 270
+    }
+  }
+}

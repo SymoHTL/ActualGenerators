@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/surge_bank",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/surge_bank"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/surge_bank",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/surge_bank",
+      "y": 270
+    }
+  }
+}

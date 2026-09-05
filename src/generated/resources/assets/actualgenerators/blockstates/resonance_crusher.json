@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/resonance_crusher",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/resonance_crusher"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/resonance_crusher",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/resonance_crusher",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/surge_bank_bottom",
+    "front": "actualgenerators:block/surge_bank_front",
+    "side": "actualgenerators:block/surge_bank_side",
+    "top": "actualgenerators:block/surge_bank_top"
+  }
+}

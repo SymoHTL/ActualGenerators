@@ -1,0 +1,10 @@
+{
+  "type": "actualgenerators:crushing",
+  "ingredient": {
+    "tag": "c:ores/gold"
+  },
+  "result": {
+    "count": 2,
+    "id": "actualgenerators:gold_dust"
+  }
+}

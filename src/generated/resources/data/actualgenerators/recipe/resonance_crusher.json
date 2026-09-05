@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "L": {
+      "item": "minecraft:flint"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    }
+  },
+  "pattern": [
+    " I ",
+    "PFP",
+    " L "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:resonance_crusher"
+  }
+}

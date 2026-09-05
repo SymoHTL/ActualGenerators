@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "D": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    }
+  },
+  "pattern": [
+    " D ",
+    "GFG",
+    " D "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:photovore"
+  }
+}

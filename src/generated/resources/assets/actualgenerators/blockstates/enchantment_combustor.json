@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/enchantment_combustor",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/enchantment_combustor"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/enchantment_combustor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/enchantment_combustor",
+      "y": 270
+    }
+  }
+}

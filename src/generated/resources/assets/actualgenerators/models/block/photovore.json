@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/photovore_bottom",
+    "front": "actualgenerators:block/photovore_front",
+    "side": "actualgenerators:block/photovore_side",
+    "top": "actualgenerators:block/photovore_top"
+  }
+}

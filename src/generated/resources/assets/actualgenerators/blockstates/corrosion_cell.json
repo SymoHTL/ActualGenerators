@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "actualgenerators:block/corrosion_cell",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "actualgenerators:block/corrosion_cell"
+    },
+    "facing=south": {
+      "model": "actualgenerators:block/corrosion_cell",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "actualgenerators:block/corrosion_cell",
+      "y": 270
+    }
+  }
+}

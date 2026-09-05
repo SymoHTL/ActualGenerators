@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/impact_dynamo_bottom",
+    "front": "actualgenerators:block/impact_dynamo_front",
+    "side": "actualgenerators:block/impact_dynamo_side",
+    "top": "actualgenerators:block/impact_dynamo_top"
+  }
+}

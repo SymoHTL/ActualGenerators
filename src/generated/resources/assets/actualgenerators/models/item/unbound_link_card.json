@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "actualgenerators:item/unbound_link_card"
+  }
+}

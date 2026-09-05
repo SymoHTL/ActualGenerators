@@ -1,0 +1,11 @@
+{
+  "type": "actualgenerators:crushing",
+  "ingredient": {
+    "item": "minecraft:cobblestone"
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:gravel"
+  },
+  "ticks": 40
+}

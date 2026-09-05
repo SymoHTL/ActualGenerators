@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "c:gems/amethyst"
+    },
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "pattern": [
+    " A ",
+    "GFG",
+    " A "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:crystal_charger"
+  }
+}
