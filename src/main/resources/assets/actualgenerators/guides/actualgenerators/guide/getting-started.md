@@ -3,6 +3,8 @@ navigation:
   title: Getting started
   icon: actualgenerators:machine_frame
   position: 10
+item_ids:
+  - actualgenerators:machine_frame
 ---
 
 # Getting started

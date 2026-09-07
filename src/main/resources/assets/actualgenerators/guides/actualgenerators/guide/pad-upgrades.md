@@ -3,6 +3,9 @@ navigation:
   title: Pad upgrades
   parent: logic-ports.md
   position: 50
+item_ids:
+  - actualgenerators:link_range_upgrade
+  - actualgenerators:unbound_link_card
 ---
 
 # Pad upgrades

@@ -3,6 +3,11 @@ navigation:
   title: The Resonance Crusher
   icon: actualgenerators:resonance_crusher
   position: 60
+item_ids:
+  - actualgenerators:resonance_crusher
+  - actualgenerators:iron_dust
+  - actualgenerators:copper_dust
+  - actualgenerators:gold_dust
 ---
 
 # The Resonance Crusher

@@ -3,6 +3,11 @@ navigation:
   title: Storing energy
   icon: actualgenerators:flux_crystal
   position: 70
+item_ids:
+  - actualgenerators:surge_bank
+  - actualgenerators:flux_crystal
+  - actualgenerators:crystal_charger
+  - actualgenerators:flux_coupler
 ---
 
 # Storing energy

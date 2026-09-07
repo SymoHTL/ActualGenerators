@@ -3,6 +3,11 @@ navigation:
   title: Tiers
   icon: actualgenerators:netherite_tier_upgrade
   position: 40
+item_ids:
+  - actualgenerators:iron_tier_upgrade
+  - actualgenerators:gold_tier_upgrade
+  - actualgenerators:diamond_tier_upgrade
+  - actualgenerators:netherite_tier_upgrade
 ---
 
 # Tiers

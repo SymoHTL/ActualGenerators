@@ -55,7 +55,10 @@ Novel energy generators + machines + wireless logistics. Rewrite of archived 1.1
   The gametest server has its own game directory (`run/gametest`) and its world is deleted before
   every run (`build.gradle`): the structures are never cleared at the end, so a kept world carried
   every earlier run's networks into the next one and "the network is not there before it is made"
-  failed on the second run and never the first.
+  failed on the second run and never the first. Its server config (`run/gametest/config`) is
+  wiped with it: NeoForge keeps a config value once written, so a changed default in
+  `ServerConfig` was not what the tests saw until the file went (the tap rated 120 a plate
+  after its default became 20).
 - **No diagnosis text.** The per-guard "why it is not moving" readout (`LinkProblem`) was removed
   at Symo's request ("completely remove the debug log shit"). The window states facts instead —
   network name and size, reach (red "out of reach" on the network line), what the channel carries,
@@ -610,6 +613,263 @@ Novel energy generators + machines + wireless logistics. Rewrite of archived 1.1
     change, reload from the component in `broadcastChanges()` so the item's own ticking is not
     clobbered. `ItemContainerContents` drops trailing empty slots, so ALWAYS guard reads with
     `slot < contents.getSlots()`.
+- **Multiblocks are boxes, and the box is the grade** (`machine/multiblock/`, Symo: "structure
+  size replaces tiers", "like Modern Industrialization ... like Extreme Reactors, ports for
+  energy, I/O, redstone", "i want really good multiblocks"). A hollow cuboid of `machine_casing`
+  (`MultiblockCasingBlock`, no BE, never ticks, `PushReaction.BLOCK`) with ONE
+  `MultiblockControllerBlock` in the front wall facing out, every edge between `minSize(extent)`
+  and `maxSize(extent)` PER EXTENT (`Extent` WIDTH/HEIGHT/DEPTH; the furnace is 3..7 wide and
+  deep and 7..15 tall, Symo's "3x3x7 minimum where 7 is the height"), not necessarily a cube.
+  `MultiblockControllerBlockEntity` finds it by walking the row and column through itself and
+  the depth from a wall corner (`locate`, overridable), then checks the whole bounding box once
+  (`find`) against `requirementAt(min, max, pos)`: SHELL (machine casing / hatch / the
+  controller), SPECIAL (`specialCasing()`), INTERIOR (`interiorAccepts(pos, state, floor)`, air
+  by default) or FREE (not part of the structure). **The shape is the controller's**: `bounds(w,
+  h, d)` says where a structure of a size stands on it, and the finder, `markShell`, the
+  hologram (`MultiblockPreviewRenderer`, teal for SPECIAL), `previewLabel`, `sizeStep` (the
+  tap's plate steps by two) and the guide scenes (`ModGuideStructureProvider`, SNBT into
+  `guides/.../structures/`, `<GameScene><ImportStructure/>` in the pages) all draw from those
+  hooks. The tap is a PLATE (Symo: "like 5x5 then 3x3 ontop, the controller has to be in the
+  top 3x3 on a face, and below the top 3x3, instead of machine casing there is some other
+  special casing"): `GEOTHERMAL_CASING` (a second `MultiblockCasingBlock`) 5..15 on a side and
+  odd, a 3×3 machine-casing cap centred on top, the controller in the middle of a cap side
+  facing out; height fixed at 2. `onStructureValidated` runs on EVERY validation, so a box that
+  did not change still gets its floor re-read. Interior volume
+  is the batch (`AnnihilationFurnaceBlockEntity.maxBatch`), so `workFactor()` scales the buffer
+  and hatch rate for free; controllers refuse every upgrade and the tier. The controller's own
+  faces move nothing (`SideConfig` all DISABLED, `MachineMenu.hasSideConfig()` false hides the
+  panel): **hatches are the only doors**. `HatchBlock` (one class, `HatchKind`
+  ITEM/ENERGY/REDSTONE/FLUID, one BE type `HATCH`) hands out PROXIES
+  (`HatchBlockEntity.ItemProxy/EnergyProxy/FluidProxy`, backed by the controller's
+  `hatchItems()/hatchEnergy()/hatchFluids()`, the last null by default) that look the controller
+  up on every call, so nothing is ever invalidated and a controller in an unloaded chunk answers
+  empty instead of swallowing items. **Controller windows share `MultiblockControllerMenu`**
+  (no side config, `extraChrome()` = `MachineLayout.MULTIBLOCK_ROW`, `structure()/formed()/
+  minSize/maxSize`) and the client-only `MultiblockPreviewRow` (the eye and three steppers,
+  boxes `MachineLayout.PREVIEW_BUTTON/stepper(extent)`), held by composition because the tap's
+  screen is a `GeneratorScreen`; a window that shows something else in the row once the box
+  stands overrides `extraChrome()` for the formed case (the tap swaps the row for the ramp bar,
+  which shares its pixels). The preview renderer asks the controller (`interiorAccepts`, public,
+  and `floorTakesFluid()`, furnace only) rather than guessing: a fluid where a box wants air
+  draws red, and the orange floor slab is drawn only where a floor fluid is wanted. Test rigs
+  build through `gametest/MultiblockRigs` (`buildBox`, `controllerPos`), one convention for
+  every controller. **A click on an item or energy hatch opens the CONTROLLER's window**
+  (Mekanism's way, never a duplicate window; `MachineMenu.stillValid` allows
+  `4 + controller.reach()` for a controller so a far hatch does not close it at once); a
+  redstone hatch has a window of its own (`RedstoneHatchMenu`/`RedstoneHatchScreen`, six rows,
+  one `HatchSignal`: CONTROL feeds the controller's `readPower()`; FORMED / WORKING / ENERGY /
+  ITEMS / EFFICIENCY REPORT the controller as 0..15 through `HatchBlock.getSignal`, refreshed
+  by `refreshSignals()` after every `serverTick`, `emit` notifying neighbours only on change).
+  **A hatch never feeds its own box**: `signalAround` skips `HatchBlock` neighbours, or a
+  reporting hatch beside the controller (or beside a CONTROL hatch) would latch it, the redstone
+  lamp lesson again. `MultiblockControllerBlock.neighborChanged` reads `readPower()`, not the
+  chassis' own. **Never polled**: `revalidate` is a flag checked in `serverTick`; set by
+  `onLoad`, `shellChanged` (casing/hatch/controller placed or broken within reach, via the
+  static per-level `LOADED` map, cleared on `LevelEvent.Unload`), `besideShellChanged`
+  (unformed: a shell block's neighbour turned to air; formed: anything INSIDE the box changed,
+  `Structure.isInside`, which is how a poured floor is re-read; a redstone clock on a casing
+  matches neither and costs nothing) and `ChunkEvent.Load` for a chunk the box reaches into
+  (`MultiblockEvents`). `validate` keeps its state while a chunk in reach is unloaded.
+  **`FORMED` is on every shell block** (`MultiblockCasingBlock.FORMED`, the same property on
+  hatches and the controller; `markShell` on attach and detach with
+  `UPDATE_CLIENTS | UPDATE_KNOWN_SHAPE`, so no neighbour storm and the hatch BEs stay): formed
+  casings and hatches wear `*_formed` textures (`ModBlockStateProvider.shell`), Symo's "actual
+  multiblock texture that gets used when the multiblock is formed". **The preview's switch is
+  client-only, its SIZE is the controller's** (`previewSize/setPreviewSize`, saved, synced as
+  `MultiblockControllerMenu.DATA_PREVIEW`, stepped by `previewButton` ids from
+  `BUTTON_PREVIEW_START`, set to the structure that forms so an unformed one previews what
+  stood; Symo: "the preview values dont stick when i turn the preview on off or form / unform
+  the multiblock"; `MultiblockPreview`, `MultiblockPreviewRenderer` on `AFTER_TRANSLUCENT_BLOCKS`,
+  which takes the LINES buffer after the filled tiles: the shared `BufferSource` ends one render
+  type's buffer when another is asked for, and a lines buffer taken first crashed the client with
+  "Not building!"):
+  the eye button and three W/H/D steppers in the controller's window
+  (`AnnihilationFurnaceMenu.PREVIEW_BUTTON/stepper`, listed in `extraChrome()` so the layout
+  test sees them) draw the box the controller would accept from where it stands, controller in
+  the BOTTOM row of the front wall with the wall centred on it (`corner = at - right x
+  width/2`): blue tiles where casing goes, orange slabs where the floor wants a fluid, red where
+  something is in the way. Nothing reaches the server; the gametest rigs (`buildBox`,
+  `controllerPos`) use the same convention, so a player who builds what the hologram shows
+  builds what the tests build. Annihilation Furnace: FE per item = hardness x
+  `energyPerHardness`, clamped to `minEnergyPerBlock`/`maxEnergyPerBlock`; only `BlockItem`s,
+  hardness < 0 and the `annihilation_refused` block tag (shulker boxes) refused; consume-first,
+  the lot's FE paid out evenly over `ticksPerOperation` (`payOut`, the last tick clears the
+  remainder), a full buffer stalls rather than loses. **It runs on heat and pays by
+  efficiency** (Symo: "the furnace should have an efficiency rating, which is based on the
+  heating liquid used inside like our new fluid, and how many items are in the furnace"): the
+  floor (y = min + 1) takes a heating fluid, `heatOf(FluidState)` = the
+  `annihilation_heat/strong` fluid tag (Corium, `heatStrongPermille` 1000) or
+  `annihilation_heat/weak` (lava, 400); `heatPermille` is the SOURCES on the floor averaged over
+  `floorArea()` (flowing counts for forming, never for heat); `loadPermille(held)` is 1000 up to
+  one batch held and falls in a straight line to `loadFloorPermille` (250) with the slots
+  stuffed (`INPUT_SLOTS x inputSlotLimit()`); `efficiencyPermille()` = heat x load / 1000 and
+  scales what a lot PAYS (`pending = total x efficiency / 1000`, read in `commit()` before the
+  extraction), never its duration -- a one-line switch if Symo wants the other. Zero heat:
+  `commit()` refuses and nothing is consumed. **The floor is poured through the controller**
+  (`AnnihilationFurnaceBlock.useItemOn`, formed only: a heating fluid in hand goes on to the
+  first empty floor block through `FluidUtil.tryEmptyContainerAndStow` on the private `Floor`
+  handler, an empty container takes the first source back; whole buckets only, `setBlock` with
+  `UPDATE_ALL` so the casing's `besideShellChanged` re-reads the heat). Corium placed on the floor
+  stays; it does not cool. Rigs: 3x7x3 is batch 5 over one floor block, 5x7x5 is 45 over nine.
+- **Corium and the Geothermal Fissure Tap** (`ModFluids`, `generator/GeothermalTapBlockEntity`,
+  `HeatPockets`; Symo: "a new fluid that is like super hot which the player can get as a
+  byproduct from the geothermal generator in small amounts"). Corium is a `BaseFlowingFluid` in
+  `minecraft:lava` (burns, glows, lava's rules everywhere) that never makes new sources
+  (`canConvertToSource(false)`), with a `LiquidBlock` (`CORIUM`, skipped by the pickaxe tag
+  loop, particle-only model) and a plain `BucketItem` (NeoForge gives every exact `BucketItem`
+  the fluid item capability itself; the bucket model is `neoforge:item/bucket` through
+  `DynamicFluidContainerModelBuilder`). The bucket is exempt in `everythingTheModAddsCanBeMade`:
+  the tap makes it, and a recipe would be a recipe for the furnace's fuel. Registration order is
+  FLUID before BLOCK, so `new LiquidBlock(ModFluids.CORIUM.get(), props)` inside the block
+  supplier is safe; `ModFluids.register` runs first in the mod ctor. **The tap is a multiblock
+  controller** (Symo: "the geothermal thingy should be a multiblock", then "like a flat
+  multiblock, like 5x5 then 3x3 ontop"; `GeothermalTapBlock extends MultiblockControllerBlock`,
+  plate 5..`GEOTHERMAL_MAX_SIZE` on a side, odd, height 2): a passive generator (warm-up ramp,
+  no upgrades, no tier) rated `energyPerTick` x `plates()` (plate area) x `depthFactor(y,
+  minBuildHeight)` (full within `fullDepth` of the floor, nothing at `reach`, y = the PLATE
+  `structure().min().getY()`, so a plate on bedrock earns the rating), nothing at all unformed;
+  `maxBatch()` = plates so the buffer, hatch rate and tank follow the plate through
+  `workFactor()`. Hatches go in the cap. Paid out of the pockets of EVERY chunk the plate lies
+  in (`tappedChunks`, up to four, cached per structure; `drawShared` takes an even share from
+  each and then the shortfall from whichever has it, so a dry chunk costs only its share; the
+  gauge sums them; Symo: "when the fissure is placed in like 4 chunks (cross intersection) it
+  should be able to tap all 4 chunks"): `HeatPockets` is one `SavedData` per level, a
+  pocket rolled once per chunk from the seed (`pocketChancePercent`, `pocketMinEnergy..
+  pocketMaxEnergy`), drawn by `draw`, regrown lazily from the elapsed ticks at
+  `pocketRegenPerTick` -- nothing ticks, a chunk nobody taps costs nothing, and a chunk with no
+  pocket makes NOTHING (relocate). The **Thermal Probe** (`ThermalProbeItem`, `use()`, action
+  bar) reads a chunk's pocket before anything is built; Symo: "an item where the player can
+  read the geothermal heat of a junk before". Every FE made adds to a fee and every
+  `energyPerCoriumMillibucket` of it is a millibucket in the tap's `FluidTank` (capacity
+  `tankCapacity` PER PLATE BLOCK; the tank overrides `fill` to `setCapacity` first,
+  because `FluidTank.fill` reads the FIELD and an overridden `getCapacity()` alone shipped a
+  tank that took one millibucket and never another, Symo's "it make 1mb and then never more";
+  the window's tank draws from the SYNCED amount, `GeothermalTapMenu.tankFluid`, never the
+  client BE's copy, which is refreshed on chunk load and hardly ever after and "reports wrong
+  values"); corium is dear, `energyPerCoriumMillibucket` 100k (Symo: "make it like 100 000 FE
+  per mb", a big plate makes it too easy);
+  a full tank stops collecting; energy hatches hand out `SidedEnergyWrapper(energy, OUTPUT)`,
+  fluid hatches the tank OUTPUT-only. **Tanks are framework**: `MachineBlockEntity.fluidTank()`
+  (null for the many without one) is gated per face by `fluidsForSide(side)` through
+  `SidedFluidHandler` and exposed as `Capabilities.FluidHandler.BLOCK` for every machine type;
+  `MachineBlock.useItemOn` lets a bucket fill or empty the tank BEFORE the window opens and
+  falls through to the window when nothing moved; a menu says `hasTank()`, `tankCapacity()`
+  and `tankFluid()` (the tap builds the stack from the synced amount, never from the client's
+  stale BE copy) and `MachineScreen.renderTank` draws it at `MachineLayout.TANK_FILL` beside
+  the gauge with the fluid's own sprite (`Chrome.drawFluidColumn`), tooltip and all. **A
+  container on the cursor clicked on the tank fills or empties it** (Symo: "the UI need to be
+  able to fill any container, also just clicking the UI bar with a bucket or container should
+  fill it"): `MachineMenu.BUTTON_TANK` -> `moveFluidThroughCursor`, `FluidUtil.
+  tryFillContainerAndStow` then `tryEmptyContainerAndStow` with a `PlayerMainInvWrapper` so a
+  stack of buckets fills one into the inventory; the carried stack is replaced by the server's
+  answer. A gametest that closes a window with something on the cursor must `setCarried(EMPTY)`
+  first: `removed()` hands the cursor back through the connection the mock player lacks.
+  `MachineMenu.extraChrome()` is where a window lists the boxes it draws beyond the shared
+  chrome; the layout test adds it and `tank()`. Gametests: `GeothermalTapTests` set the chunk's
+  pocket outright (`HeatPockets.set`), build boxes through `MultiblockRigs` and use a far-off
+  `ChunkPos` for the pocket arithmetic, since every test shares the one server; the bucket test
+  loads two and a half buckets into the tank through `saveWithoutMetadata`/`loadWithComponents`
+  rather than waiting an hour of warm-up.
+- **Design before build.** Anything with a look or a gesture gets, BEFORE any Java: a short
+  design note (controls, what each click does, which mod it mirrors — Symo cites Thermal,
+  Mekanism, MI, XNet) and a PIL composite from the real textures (a wall, a plate from above, a
+  hatch with its markers; `art/mockups/candidates/` holds them), and a go from Symo. Read the
+  image. A new configurable thing is configured like the chassis: per side, the side panel's
+  cross, mode plus auto flags — never a hidden gesture, never one global switch for a thing
+  with sides. "The multiblock" means every block of it, controller included; exclusions are
+  asked up front, never listed under "skipped" after. Ambiguities go in one batched message of
+  short options, then one build. Round six (2026-09-06) was sent back twice for skipping all of
+  this: a crouch-click cycle ("awful wtf are you thinking"), gold frames ("confusing ass hell"),
+  a hatch with no sides ("I CANT CONFIGURE IT FOR A SPECIFIC SIDE"), a coil over every top, a
+  plus per casing, no controller ("DO I HAVE TO TELL YOU EVERYTING????"). The composite has to
+  show every way a piece is laid (all four corners of a ring, both ends of a wall) and be READ,
+  not glanced at: the fin corners lined up on one corner of four and Symo saw it, the render did
+  not. What worked: a candidate sheet at wall scale (`casing_all.png`, ten looks) and a marker
+  sheet got picks in one message, and round six's fourth take was accepted in game.
+- **A hatch is a machine face and is set up in the machine's own side panel** (`HatchBlock.
+  FACING` set on placement like a machine's, `HatchBlockEntity.sides` a `SideConfig`, every face
+  BOTH when placed, auto flags OFF; Symo: "copy the exact fucking configuration panel we already
+  build for non multiblock structures", "the faces will be the faces of how the player placed
+  the fucking block"). A plain click on an item, energy or fluid hatch opens the CONTROLLER's
+  window told which hatch it came from (`HatchBlock.useWithoutItem` wraps the controller's
+  `MenuProvider`, writes both positions; `MultiblockControllerMenu.withHatch/hatch()/readHatch`,
+  eight synced values) and the side panel is the hatch's: `hasSideConfig`, `sidePanelOpenAtStart`
+  (open at once), `supportsKind` (the hatch's kind only), `sideMode`, `autoEnabled`, `sideBlocked`
+  overridden, the SAME `BUTTON_SIDES_START`/`BUTTON_AUTO_START` buttons routed to
+  `cycleSide`/`toggleAuto`. Faces whose neighbour is part of the structure are BLOCKED
+  (`blockedMask`, `MachineMenu.sideBlocked`): dark in the panel, unclickable, nothing moves
+  through them. **BOTH is drawn split** (`MachineScreen.fillMode`: input blue upper right,
+  output orange lower left, no green anywhere; Symo: "no green, both should be split (like a
+  triangle toast)"), on every machine's panel too. **Every hatch face wears a marker** for its
+  mode (`hatch_marker_input/output/both`, cutout decals from `ConnectedCasingModel` reading the
+  hatch's synced faces through `MARKERS` model data; the hatch BE syncs with the update tag and
+  redraws its chunk on the client): Thermal Expansion's way, Symo's ask. Two earlier takes are
+  dead and stay dead: a crouch-click cycling open/pull/push, and a one-face panel with a global
+  IN/OUT. The proxies are PER FACE and gate by that face's mode live (`items(side)` null for a
+  DISABLED face, `invalidateCapabilities` on a face change), and the CONTROLLER's transfer pass
+  runs every hatch's `autoTransfer` through the chassis hook `MachineBlockEntity.
+  autoIoBeyondFaces`: pull through input faces, push through output faces, never through a
+  blocked one; one pass, one schedule, no hatch ever ticks. The movers are static in
+  `machine/Movers` (items as the chassis always did them, energy one capped call per tick
+  covered, fluids whole through `FluidUtil.tryFluidTransfer`); the energy budget is
+  `hatchEnergyRate(push)`, the chassis rate. Jade shows the face you look at
+  (`HatchStatusProvider`). **A held hatch swaps into a wall** (`HatchBlockItem.onItemUseFirst`
+  on a casing or a hatch of another kind: the old block comes back to the player; Symo: "when i
+  have a hatch in my hand there should be a green outline where i could place it, even if there
+  is already another multiblock block there"). Gametests: `AutoIoTests`.
+- **Formed shell blocks are one connected surface** (`ConnectedCasingModel`, loader
+  `actualgenerators:connected_casing`, datagen `ModBlockStateProvider.casing(block, name,
+  panel)` for casings AND hatches, a hatch joining with `machine_casing_panel`; Symo: "the
+  textures on a formed multiblock should be connected", "the hatches should also be included"):
+  a face is nine flat quads, the CENTRE always the block's own `_formed` texture (a hatch keeps
+  its door), the rim along an edge with no formed shell block past it its own too, the `_panel`
+  plate where one stands (`getModelData` reads the six neighbours' `FORMED` when the chunk is
+  built, `JOINED` model property, no block state and no BE). A block with nothing formed round
+  it draws exactly its `_formed` texture. Two structures touching merge visually; accepted.
+  **The controller joins the wall** (`ModBlockStateProvider.controller`: one connected model
+  per facing with `"front": <facing>` and a `front` texture; the model is laid in world
+  directions and takes no blockstate rotation, so the loose model keeps `rotationY` and the
+  formed ones are four). **The tap's plate is rings of fins** (Symo: "connected radially ...
+  like a copper spule", then "just use the current side texture but make that like in a ring
+  shape every 2 blocks ... starting from outside to inside"): `GeothermalCasingBlock` carries
+  `CoilPiece.COIL` (plain, ring X/Z, four corners named for where they lie from the centre),
+  set by the tap's `shellState` override (the controller hook `markShell` calls for every shell
+  block) from the block's offset to the plate centre: the outermost ring wears fins, every
+  second ring inward too, the centre never. The model's `top` texture is laid on the top AND
+  the bottom by `top_map` (`ConnectedCasingModel.TopMap`: which block corner the texture's
+  top-left lands on, or `swap`), the UVs rewritten from each vertex's POSITION after
+  `FaceBakery` bakes the quad, so no UV-rotation guesswork and the L bends toward the centre
+  from below too. Textures `geothermal_casing_plate`, `_ring` (the fin rows edge to edge, which
+  also run round the plate's side), `_ring_corner` (fins at `max(u, v)` from the top-left).
+  **The casing surface is random detail tiles** (Symo's pick, F of the candidates in
+  `art/mockups/candidates/casing_all.png`, chosen at wall scale: "a side is like 100x100"): the
+  model's `variants` param names detail tiles (`machine_casing_panel_1..4`: bolts, vent,
+  recessed panel, pilot light) the MIDDLE of a casing is drawn from, one per block by a hash of
+  its position (`middleFor`, shares 55/17/12/10/6 with the plain panel first, `MIDDLE` model
+  data); the rims stay the plain panel where joined and the block's own bevel where not. Hatches
+  and controllers have no variants: their middle is their own face. The fin rows of the plate's
+  rings are a palindrome (row k = row 15 − k) so a piece laid any way round meets its neighbour:
+  the first take's light/dark fin pairs lined up on one corner of four.
+- **The preview is ghost blocks** (`MultiblockPreviewRenderer.ghost`: the block's own baked model
+  through `Sheets.translucentCullBlockSheet()` behind a `Ghost` vertex consumer that fixes the
+  alpha the block renderer hard-codes; Symo: "render the actual block the player needs to
+  build"), red THROUGH WALLS on what is in the way (`ModRenderTypes.FILLED_SEE_THROUGH`,
+  `addChainedFilledBoxVertices`, ended with the depth test off by hand; Symo: "the wrong blocks
+  should render through walls"), orange on a floor that wants a fluid, and with a hatch in
+  either hand a green frame on every SHELL spot of every preview and of every formed structure
+  the client knows (`MultiblockControllerBlockEntity.clientControllers()`, registered on load
+  like the pads; the structure rides the update tag). The gold frames on every shell spot were
+  "confusing ass hell" and are gone. Buffers: ghosts and tiles first, the lines buffer after
+  them, the see-through fill last (see "Not building!").
+- **The side panel shows only the kinds a machine moves** (`MachineMenu.supportsKind/
+  sideKinds`, items when `itemsForSide(null)` is not null, fluid when there is a tank, energy
+  always; the screen's tabs and `selectedKind()` follow, the menu refuses buttons for the rest;
+  Symo: "some blocks have side configs for capabilities they dont even support, like the surge
+  bank"), and **the Surge Bank pulls and pushes from the first tick** (`defaultSides` sets both
+  auto flags; its one-way faces are what keep two banks from handing energy back and forth).
+- **Every block of ours is in `minecraft:mineable/pickaxe`** (`ModBlockTagsProvider` loops
+  `ModBlocks.BLOCKS`): every machine has `requiresCorrectToolForDrops`, and without the tag no
+  tool is correct and nothing dropped in survival. Found while adding the casing; do not remove.
 - **Passive generators take energy upgrades only** (`acceptsUpgrade`): a generator paid by the
   world — depth, weather, light — has no fuel to trade away, so speed/overclock would conjure FE
   rather than burn faster for less. Refuse those upgrades at the slot; don't accept-and-ignore.

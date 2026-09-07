@@ -20,6 +20,7 @@ lives.
 - [The machine chassis](machines.md): faces, redstone, the config card. Every machine works the same way.
 - [Upgrades](upgrades.md) and [tiers](tiers.md): two ways to make a machine better, priced very differently.
 - [Generators](generators.md): what each one is paid by, and what it refuses.
+- [Multiblocks](multiblocks.md): boxes of casing with hatches for doors. The box is the grade.
 - [The Resonance Crusher](resonance-crusher.md): frequency-tuned ore processing.
 - [Storing energy](energy-storage.md): the Surge Bank, Flux Crystals, the Charger and the Coupler.
 - [Logic Ports](logic-ports.md): wireless items, fluids and energy. Two clicks to a working link.

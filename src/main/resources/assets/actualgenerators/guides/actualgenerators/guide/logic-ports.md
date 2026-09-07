@@ -3,6 +3,8 @@ navigation:
   title: Logic Ports
   icon: actualgenerators:logic_port
   position: 80
+item_ids:
+  - actualgenerators:logic_port
 ---
 
 # Logic Ports

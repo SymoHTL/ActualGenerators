@@ -3,6 +3,9 @@ navigation:
   title: Networks, the injector and the tool
   parent: logic-ports.md
   position: 40
+item_ids:
+  - actualgenerators:linking_tool
+  - actualgenerators:energy_injector
 ---
 
 # Networks, the injector and the tool

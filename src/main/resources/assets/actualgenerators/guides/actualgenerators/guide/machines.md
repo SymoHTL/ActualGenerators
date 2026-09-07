@@ -3,6 +3,8 @@ navigation:
   title: The machine chassis
   icon: actualgenerators:resonance_crusher
   position: 20
+item_ids:
+  - actualgenerators:config_card
 ---
 
 # The machine chassis
@@ -59,3 +61,8 @@ that ate your upgrades would be a bug.
 - The **progress arrow**, where there is one, says what fraction of the current operation is done,
   and "Nothing in progress" when idle.
 - Every empty upgrade slot draws a faded picture of what it takes. Nothing is a bare square.
+- A machine with a **tank** shows it beside the gauge, with the fluid, the amount and the
+  capacity on hover. Click the tank with a bucket or any fluid container on the cursor and it
+  fills from the tank, or empties into it, whichever the tank allows; a stack of buckets fills
+  one and puts it in your inventory. A bucket used on the block itself does the same before
+  the window opens.

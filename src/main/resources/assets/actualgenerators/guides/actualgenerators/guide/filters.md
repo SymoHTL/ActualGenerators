@@ -3,6 +3,8 @@ navigation:
   title: Filters
   parent: logic-ports.md
   position: 30
+item_ids:
+  - actualgenerators:filter
 ---
 
 # Filters

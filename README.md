@@ -56,13 +56,13 @@ Concrete designs are still in flux. Current candidates (ideas, not commitments):
 | Early | Hydrostatic Generator | **Built.** Output scales with the water column standing above it — flood a shaft, let pressure pay. Only still water counts, so one bucket down a hole earns nothing; waterlogged blocks do, so the shaft can be built rather than dug. It burns no fuel, and so takes no speed or overclock upgrades: what you built is what it pays. (Physically impossible. Kept anyway.) |
 | Early | Photovore | **Built.** Grazes on placed light sources: eats the nearest one and pays by how brightly it burned. What counts as food is a tag, so it will never touch a beacon, a portal or a lava lake — but it will absolutely eat your torches, and then come the mobs. |
 | Early | Corrosion Cell | **Built.** A galvanic pile that drives copper up the weathering ladder and harvests the reaction. Copper in, the next oxidation stage out, FE the whole way — nothing is destroyed. Waxed copper is sealed and refused. |
-| Mid | Geothermal Fissure Tap | IRL-style geothermal: taps finite heat pockets near bedrock that deplete — relocate or it dies down. |
+| Mid | Geothermal Fissure Tap | **Built.** IRL-style geothermal: taps the finite heat pockets under its plate, one per chunk it lies in, rolled once from the seed, full only near the world floor and fading to nothing higher up. The pocket drains as it runs and regrows at a trickle; a chunk with no pocket makes nothing — relocate, and the **Thermal Probe** reads a chunk before you build. A flat multiblock: a plate of Geothermal Casing five to fifteen on a side, a 3×3 cap of Machine Casing on top, the tap in a side of the cap, and the plate is the bore — every plate block is another share of the rating, depth measured at the plate, so lay it on bedrock. Leaves Corium behind, a millibucket per hundred thousand FE, which is the heat the Annihilation Furnace runs on; it leaves through Fluid Hatches. |
 | Mid | Portal Flux Generator | Siphons the dimensional gradient of an active nether portal. Destabilizes it: flickering, uninvited zombified piglins. |
 | Mid | Spawner Siphon | **Built.** Clamps onto a spawner, holds its countdown out of reach and banks FE for every spawn it denies. The rate is read off the spawner itself, so an Apothic-upgraded one pays more with no integration code involved. Reversible: break the siphon and the spawner goes back to work. |
 | Mid | Enchantment Combustor | **Built.** Burns the enchantments off gear and hands the gear back — a grindstone that pays the grid instead of the player. FE scales with the total levels on the item, so one kitted-out drop beats a pile of single-enchantment books. Enchanted books come back as plain ones. |
 | Late | Storm Capacitor | Trickle-charges in thunderstorms; a baited lightning-rod strike delivers an enormous burst (an IRL bolt is 1–10 GJ) that only a Surge Bank can fully catch. |
 | Late | Crystal Resonator | Masquerades as a dragon: player-placed end crystals lock their healing beams onto it, and it drinks the stream. No dragon required — you build your own arena. Overdraw and crystals detonate in a chain. |
-| Late | Annihilation Furnace | Mass–energy conversion (E=mc²): feed it bulk junk blocks, get FE by mass. The endgame trash can. |
+| Late | Annihilation Furnace | **Built.** Mass–energy conversion (E=mc²): feed it bulk junk blocks, get FE by mass. The endgame trash can. A multiblock: a tall hollow box of Machine Casing, seven high at the least, with the controller in the front wall, and the box is the grade — every block inside is one more item per operation. It runs on heat: Corium on the floor is full heat, lava a poor second, nothing is nothing. Heat times load is its efficiency, and load is how the slots are managed — stuff them past the batch and every item pays less. A block's hardness is its mass, so a pack's blocks are worth what they are made of with no recipe written; only blocks burn, and shulker boxes are refused by tag. |
 | Endgame | Tesla Array | A multiblock field of coil towers harvesting the ground-to-ionosphere charge gradient — Tesla's actual Wardenclyffe dream, working here. Needs open sky, scales with altitude and array size, storms multiply output, and the top tier summons its own storms. |
 
 ### The machine framework
@@ -112,6 +112,58 @@ Every machine in the mod ships with the same chassis:
   holds more than a bare one. An AE2 pattern
   provider pushes until the slot says no; a slot stuck at sixty-four would have
   capped a netherite machine at sixty-four a tick whatever its batch said.
+
+### Multiblocks
+
+The late-game generators are structures, not blocks, built the way Modern Industrialization and
+Extreme Reactors build theirs: **Machine Casing** with one controller set into it facing out,
+in a shape of the machine's own. The furnace is a hollow box, three to seven wide and deep and
+seven to fifteen tall; the tap a plate of its own casing, five to fifteen on a side, with a 3×3
+cap of Machine Casing on top and the controller in the cap's side. Place the last casing
+and it forms on the next tick, every casing and hatch lighting its seams; break one and it all
+goes dark the same tick.
+
+- **The size is the grade.** No upgrade slots, no tier: every block of air inside the furnace
+  is one more item per operation, every block in the tap's plate one more share of the rating,
+  and the buffer, hatch rate and tank grow with it. Want more, build bigger.
+- **The shape is the controller's.** The framework walks a hollow box by default; a controller
+  that is another shape says where it stands and what goes where, and the finder, the
+  hologram, the guide's scenes and the test rigs all draw from that one answer.
+- **Hatches are the only doors.** The controller's own faces move nothing. An **Item Hatch**,
+  an **Energy Hatch**, a **Fluid Hatch** or a **Redstone Hatch** goes anywhere Machine Casing goes, as many as you like,
+  and each answers for the controller: a hatch holds nothing, ticks never, and hands out a
+  proxy that is right whether the box stands or not, so a pad or a pipe on it never has to be
+  reconnected.
+- **Nothing is scanned.** A casing has no block entity. The controller looks at its box only
+  when a casing, hatch or controller is placed or broken within reach, when something inside
+  the box changes, or when a chunk its box reaches into loads. Casings cannot be pushed by
+  pistons, so a sealed box stays sealed.
+- **A preview before a single casing.** The controller's window has an eye and three steppers:
+  press the eye and a hologram of the structure stands round the controller, a ghost of every
+  block still to place drawn as itself, orange where a floor wants a fluid, red through walls
+  where something is in the way. Hold a hatch and every spot it may go is framed green, and a
+  hatch used on a casing takes its place. The sizes stick with the controller. The guide shows
+  every structure as a scene generated from the same conventions.
+- **A hatch is a machine face and is set up like one.** Click it and the controller's window opens
+  with the same side panel every machine has: the hatch's six faces relative to how you placed it,
+  the ones looking into the structure greyed out, and IN and OUT toggles for whether the structure
+  pulls and pushes through it on its own transfer pass. Every face wears a marker for what it lets
+  through. No pipes needed, no second window.
+- **A formed structure looks like one machine.** Casings, hatches and the controller join into one
+  surface, rimmed only where the structure ends; the tap's plate becomes rings of fins round its
+  centre, every second block from the outside in.
+- **Tanks take a click.** A machine with a tank draws it in its window; a bucket or any fluid
+  container on the cursor, clicked on the tank, fills from it or empties into it, and a bucket
+  on the block does the same before the window opens.
+- **Hatches have windows.** An item or energy hatch opens the controller's window from
+  wherever on the box it is; a redstone hatch opens its own, six modes: Control (a signal here
+  is a signal at the controller), Formed, Working, Energy, Items and Efficiency, reported as
+  nought to fifteen like a comparator. A hatch never powers its own box.
+- **Heat and efficiency.** The furnace's floor takes a fluid: Corium, a bucket per floor
+  block, is full heat, lava forty percent, poured and scooped through the controller with a
+  bucket. Heat times load is the efficiency every item is paid at; load is how the slots are
+  managed, no load up to a batch held and a straight line down to a quarter with the slots
+  stuffed. Efficiency scales what a lot pays, never how long it takes.
 
 ### Machines
 
@@ -422,6 +474,7 @@ src/main/java/dev/symo/actualgenerators/
   ActualGenerators.java     @Mod entrypoint
   config/                   server config; balance numbers live here, never in code
   machine/                  the machine framework -- chassis, energy, sides, upgrades
+  machine/multiblock/       casing, hatches, and the controller a box of casing forms round
   generator/                the generators
   storage/                  energy storage
   menu/                     containers and the GUI layout the screens read

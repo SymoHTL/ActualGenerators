@@ -3,6 +3,11 @@ navigation:
   title: Upgrades
   icon: actualgenerators:speed_upgrade
   position: 30
+item_ids:
+  - actualgenerators:energy_upgrade
+  - actualgenerators:speed_upgrade
+  - actualgenerators:overclock_upgrade
+  - actualgenerators:stack_upgrade
 ---
 
 # Upgrades
