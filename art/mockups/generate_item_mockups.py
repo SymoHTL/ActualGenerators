@@ -33,12 +33,13 @@ TRANSPARENT = (0, 0, 0, 0)
 
 
 class Canvas:
-    def __init__(self):
-        self.img = Image.new("RGBA", (SIZE, SIZE), TRANSPARENT)
+    def __init__(self, size=SIZE):
+        self.size = size
+        self.img = Image.new("RGBA", (size, size), TRANSPARENT)
         self.px = self.img.load()
 
     def dot(self, x, y, colour):
-        if 0 <= x < SIZE and 0 <= y < SIZE:
+        if 0 <= x < self.size and 0 <= y < self.size:
             self.px[x, y] = colour if len(colour) == 4 else colour + (255,)
 
     def rect(self, x0, y0, x1, y1, colour):
@@ -536,6 +537,338 @@ class Sheet:
 GUI_WIDTH, GUI_HEIGHT = 176, 194
 
 
+def machine_casing_block(formed=False):
+    """The wall block of every multiblock. Loose, the casing with a cross brace; formed, the
+    bevelled plate whose rim the connected model shows where a structure ends (its middle is
+    drawn from the panel tiles, so it stays plain)."""
+    c = machine_casing()
+    if formed:
+        for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+            c.dot(x, y, HEAT[3])
+    else:
+        c.hline(3, 12, 7, CASING[1])
+        c.hline(3, 12, 8, CASING[3])
+        c.vline(7, 3, 12, CASING[1])
+        c.vline(8, 3, 12, CASING[3])
+        c.rect(7, 7, 8, 8, CASING[0])
+    c.save("machine_casing_formed" if formed else "machine_casing", BLOCK_DIR)
+
+
+def geothermal_casing_block():
+    """The plate block under a tap, loose: the casing panel with copper fins across it."""
+    c = machine_casing()
+    for y in (4, 7, 10):
+        c.hline(3, 12, y, COPPER[3])
+        c.hline(3, 12, y + 1, COPPER[1])
+    c.vline(7, 3, 12, COPPER[2])
+    c.vline(8, 3, 12, COPPER[1])
+    c.save("geothermal_casing", BLOCK_DIR)
+
+
+def machine_casing_panel():
+    """The plain plate of a formed wall: what a casing shows between the rims, and most of the
+    wall's middles. Flat on purpose; the detail tiles carry the interest."""
+    c = Canvas()
+    c.rect(0, 0, 15, 15, CASING[2])
+    c.save("machine_casing_panel", BLOCK_DIR)
+
+
+def machine_casing_panel_detail(index):
+    """One of the detail tiles a formed wall's middles are picked from by position: bolts, a
+    vent, a recessed panel, a pilot light. Each sits inside the rim, so it never meets a seam."""
+    c = Canvas()
+    c.rect(0, 0, 15, 15, CASING[2])
+    if index == 1:
+        for x, y in ((4, 4), (11, 4), (4, 11), (11, 11)):
+            c.dot(x, y, CASING[4])
+            c.dot(x + 1, y + 1, CASING[1])
+    elif index == 2:
+        for y in (5, 8, 11):
+            c.hline(3, 12, y, CASING[0])
+            c.hline(3, 12, y + 1, CASING[1])
+    elif index == 3:
+        c.rect(3, 3, 12, 12, CASING[1])
+        c.rect(4, 4, 11, 11, CASING[2])
+        c.hline(4, 11, 4, CASING[3])
+        c.vline(4, 4, 11, CASING[3])
+    else:
+        c.rect(6, 6, 9, 9, CASING[0])
+        c.rect(7, 7, 8, 8, HEAT[3])
+    c.save("machine_casing_panel_%d" % index, BLOCK_DIR)
+
+
+# The fins of the plate's rings: three light fins between dark grooves, edge to edge. The rows
+# read the same from either side (row k is row 15 - k), so a piece laid any way round meets its
+# neighbour and every corner of a ring lines up.
+FIN_ROWS = {3: HEAT[1], 4: HEAT[3], 5: HEAT[3], 6: HEAT[1], 7: HEAT[3], 8: HEAT[3], 9: HEAT[1],
+            10: HEAT[3], 11: HEAT[3], 12: HEAT[1]}
+
+
+def geothermal_casing_plate():
+    """The plain plate between the rings, and under the cap: flat, four rivets."""
+    c = Canvas()
+    c.rect(0, 0, 15, 15, CASING[2])
+    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+        c.dot(x, y, CASING[3])
+    c.save("geothermal_casing_plate", BLOCK_DIR)
+
+
+def geothermal_casing_ring():
+    """A straight piece of a ring: three hot fins running left to right, edge to edge, so they
+    run on into the next block and round the plate's side as well."""
+    c = Canvas()
+    c.rect(0, 0, 15, 15, CASING[2])
+    for y, colour in FIN_ROWS.items():
+        c.hline(0, 15, y, colour)
+    c.save("geothermal_casing_ring", BLOCK_DIR)
+
+
+def geothermal_casing_ring_corner():
+    """A corner of a ring: the fins bend round the top-left corner, the one that faces the centre."""
+    c = Canvas()
+    c.rect(0, 0, 15, 15, CASING[2])
+    for y in range(16):
+        for x in range(16):
+            k = max(x, y)
+            if k in FIN_ROWS:
+                c.dot(x, y, FIN_ROWS[k])
+    c.save("geothermal_casing_ring_corner", BLOCK_DIR)
+
+
+# Thermal's way: the colour of the panel's face buttons on the face itself.
+MARKER_INPUT = (62, 155, 216)
+MARKER_OUTPUT = (216, 129, 62)
+
+
+def hatch_marker(mode):
+    """A one-pixel frame a pixel in from the edge, in the mode's colour; "both" is split along
+    the diagonal, input in the upper right and output in the lower left, like the panel."""
+    c = Canvas()
+    for y in range(1, 15):
+        for x in range(1, 15):
+            if x in (1, 14) or y in (1, 14):
+                if mode == "input":
+                    colour = MARKER_INPUT
+                elif mode == "output":
+                    colour = MARKER_OUTPUT
+                else:
+                    colour = MARKER_INPUT if x >= y else MARKER_OUTPUT
+                c.dot(x, y, colour)
+    c.save("hatch_marker_" + mode, BLOCK_DIR)
+
+
+def hatch(name, art, ramp, formed=False):
+    """A casing with an opening and one glyph in it: what the hatch lets through. Formed, the rim burns."""
+    c = machine_casing()
+    c.rect(3, 3, 12, 12, HEAT[1] if formed else CASING[0])
+    if formed:
+        c.rect(4, 4, 11, 11, CASING[0])
+        for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+            c.dot(x, y, HEAT[3])
+    c.paint(art, ramp, 4, 4)
+    c.save(name + "_formed" if formed else name, BLOCK_DIR)
+
+
+ITEM_HATCH_ART = [
+    "........",
+    "33333333",
+    "32222223",
+    "32222223",
+    "31111113",
+    "31111113",
+    "00000000",
+    "........",
+]
+ENERGY_HATCH_ART = [
+    "....33..",
+    "...34...",
+    "..344...",
+    ".3444333",
+    "3334443.",
+    "...443..",
+    "...43...",
+    "..33....",
+]
+REDSTONE_HATCH_ART = [
+    "........",
+    "..1111..",
+    ".111111.",
+    ".112211.",
+    ".112211.",
+    ".111111.",
+    "..1111..",
+    "....0...",
+]
+
+
+def item_hatch(formed=False):
+    # A tray with a lip: things go in here.
+    hatch("item_hatch", ITEM_HATCH_ART, NICKEL, formed)
+
+
+def energy_hatch(formed=False):
+    # A bolt.
+    hatch("energy_hatch", ENERGY_HATCH_ART, FLUX, formed)
+
+
+def redstone_hatch(formed=False):
+    # A torch head seen straight on: dark red round a lit centre.
+    hatch("redstone_hatch", REDSTONE_HATCH_ART, HEAT, formed)
+
+
+FLUID_HATCH_ART = [
+    "...33...",
+    "...33...",
+    "..3333..",
+    ".344333.",
+    ".344333.",
+    ".333333.",
+    "..3333..",
+    "...11...",
+]
+
+
+def fluid_hatch(formed=False):
+    # A drop, lit on its upper left.
+    hatch("fluid_hatch", FLUID_HATCH_ART, VERDIGRIS, formed)
+
+
+# Corium: a crust of cooled rock over a glow that shows through the cracks.
+CORIUM = [(30, 14, 10), (58, 26, 16), (128, 40, 20), (228, 122, 44), (250, 200, 96)]
+CORIUM_ART = [
+    "1100111011100011",
+    "1011122111011101",
+    "0112331121101110",
+    "1123321101110011",
+    "1122111011332111",
+    "0111100112443211",
+    "1101101112332110",
+    "1100111011221011",
+    "0111011101110111",
+    "1122111101011122",
+    "1233211011101233",
+    "1123321110111122",
+    "0112211123211011",
+    "1101101233321101",
+    "1110011122211011",
+    "0110110111101110",
+]
+
+
+def corium_still():
+    c = Canvas()
+    c.paint(CORIUM_ART, CORIUM)
+    c.save("corium_still", BLOCK_DIR)
+
+
+def corium_flow():
+    """The flowing sprite is 32 wide like lava's: the still crust, tiled, the other copies turned so the seam hides."""
+    c = Canvas(32)
+    c.paint(CORIUM_ART, CORIUM, 0, 0)
+    c.paint([row[::-1] for row in CORIUM_ART], CORIUM, 16, 0)
+    c.paint(CORIUM_ART[::-1], CORIUM, 0, 16)
+    c.paint([row[::-1] for row in CORIUM_ART[::-1]], CORIUM, 16, 16)
+    c.save("corium_flow", BLOCK_DIR)
+
+
+def geothermal_tap_side():
+    c = machine_casing()
+    # The bore pipe, running down into the floor, glowing where the heat comes up.
+    c.rect(6, 2, 9, 13, CASING[0])
+    c.rect(7, 2, 8, 13, COPPER[2])
+    c.vline(7, 2, 13, COPPER[3])
+    for y in (4, 8, 12):
+        c.hline(6, 9, y, COPPER[1])
+    c.rect(7, 11, 8, 13, HEAT[3])
+    c.dot(7, 13, HEAT[4])
+    c.save("geothermal_tap_side", BLOCK_DIR)
+
+
+def geothermal_tap_front(formed=False):
+    """The wellhead: a heat dial above a sight glass of corium. Formed, the rim burns like every shell block's."""
+    c = machine_casing()
+    c.rect(4, 3, 11, 8, CASING[0])
+    c.rect(5, 4, 10, 7, NICKEL[2])
+    c.hline(5, 10, 4, NICKEL[4])
+    c.dot(6, 6, HEAT[2])
+    c.dot(7, 5, HEAT[3])
+    c.dot(8, 5, HEAT[3])
+    c.dot(9, 6, HEAT[2])
+    c.rect(7, 6, 8, 6, CASING[0])
+    c.rect(4, 9, 11, 13, CASING[0])
+    c.rect(5, 10, 10, 12, CORIUM[1])
+    c.hline(5, 10, 12, CORIUM[3])
+    c.dot(7, 11, CORIUM[3])
+    c.dot(8, 10, CORIUM[2])
+    if formed:
+        for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+            c.dot(x, y, HEAT[3])
+        c.hline(5, 10, 12, CORIUM[4])
+        c.dot(6, 6, HEAT[3])
+        c.dot(9, 6, HEAT[3])
+        c.dot(7, 5, HEAT[4])
+        c.dot(8, 5, HEAT[4])
+    c.save("geothermal_tap_front_formed" if formed else "geothermal_tap_front", BLOCK_DIR)
+
+
+def geothermal_tap_top():
+    c = machine_casing()
+    # The valve wheel on the wellhead.
+    c.rect(4, 4, 11, 11, CASING[0])
+    c.rect(5, 5, 10, 10, COPPER[1])
+    c.rect(6, 6, 9, 9, CASING[0])
+    c.rect(7, 7, 8, 8, COPPER[3])
+    c.vline(7, 4, 11, COPPER[2])
+    c.hline(4, 11, 7, COPPER[2])
+    c.vline(8, 4, 11, COPPER[3])
+    c.hline(4, 11, 8, COPPER[3])
+    c.save("geothermal_tap_top", BLOCK_DIR)
+
+
+def geothermal_tap_bottom():
+    c = machine_casing()
+    # The bore mouth: the fissure it sits over, heat coming up through it.
+    c.rect(3, 3, 12, 12, CASING[0])
+    c.rect(4, 4, 11, 11, CORIUM[0])
+    c.paint([
+        "1..1....",
+        ".12.1...",
+        "..23.1..",
+        "1.2432.1",
+        ".1.343.1",
+        "..1.2.1.",
+        ".1..1...",
+        "1...1..1",
+    ], CORIUM, 4, 4)
+    c.save("geothermal_tap_bottom", BLOCK_DIR)
+
+
+def annihilation_furnace_front(formed):
+    """The controller: a viewing port on to the void inside. Formed, the rim burns."""
+    c = machine_casing()
+    c.rect(3, 3, 12, 12, CASING[0])
+    c.paint([
+        "00000000",
+        "01111110",
+        "01222210",
+        "01233210",
+        "01233210",
+        "01222210",
+        "01111110",
+        "00000000",
+    ], VOID, 4, 4)
+    if formed:
+        for x in range(4, 12):
+            c.dot(x, 4, HEAT[3])
+            c.dot(x, 11, HEAT[2])
+        for y in range(5, 11):
+            c.dot(4, y, HEAT[3])
+            c.dot(11, y, HEAT[2])
+        c.dot(7, 7, HEAT[4])
+        c.dot(8, 8, HEAT[4])
+    c.save("annihilation_furnace_front_formed" if formed else "annihilation_furnace_front", BLOCK_DIR)
+
+
 def gui_chrome(s):
     """Everything every machine window has: the frame, the energy bar, the player inventory.
 
@@ -934,6 +1267,33 @@ def resonance_crusher_bottom():
     c.save("resonance_crusher_bottom", BLOCK_DIR)
 
 
+def thermal_probe():
+    """A probe rod with a hot bulb at the tip and a readout on the grip: it reads heat, it links nothing."""
+    c = Canvas()
+    # Grip, lower left, wrapped dark.
+    for i in range(4):
+        x, y = 2 + i, 13 - i
+        c.dot(x, y, VOID[2])
+        c.dot(x + 1, y, VOID[3])
+        c.dot(x, y - 1, VOID[1])
+    # The rod up to the bulb, lit on its upper-left edge.
+    for i in range(5):
+        x, y = 6 + i, 9 - i
+        c.dot(x, y, NICKEL[2])
+        c.dot(x, y - 1, NICKEL[4])
+        c.dot(x + 1, y, NICKEL[0])
+    # The bulb: hot at the core, dark at the rim.
+    c.rect(11, 2, 13, 4, HEAT[1])
+    c.dot(12, 3, HEAT[4])
+    c.dot(11, 3, HEAT[3])
+    c.dot(12, 2, HEAT[3])
+    c.dot(13, 4, HEAT[0])
+    # The readout on the grip: two lit segments.
+    c.dot(4, 9, FLUX[3])
+    c.dot(5, 8, FLUX[2])
+    c.save("thermal_probe")
+
+
 def linking_tool():
     """A stubby wrench with a linking head: the jaw says tool, the lens says what it links."""
     c = Canvas()
@@ -1211,6 +1571,7 @@ def main():
     tier_upgrade("netherite_tier_upgrade", TRIM)
     config_card()
     linking_tool()
+    thermal_probe()
     filter_item()
     machine_frame()
     metal_dust("iron_dust", SILVER)
@@ -1270,6 +1631,35 @@ def main():
     logic_port()
     link_range_upgrade()
     unbound_link_card()
+
+    machine_casing_block()
+    machine_casing_block(True)
+    item_hatch()
+    item_hatch(True)
+    energy_hatch()
+    energy_hatch(True)
+    redstone_hatch()
+    redstone_hatch(True)
+    fluid_hatch()
+    fluid_hatch(True)
+    geothermal_casing_block()
+    machine_casing_panel()
+    for index in (1, 2, 3, 4):
+        machine_casing_panel_detail(index)
+    geothermal_casing_plate()
+    geothermal_casing_ring()
+    geothermal_casing_ring_corner()
+    for mode in ('input', 'output', 'both'):
+        hatch_marker(mode)
+    annihilation_furnace_front(False)
+    annihilation_furnace_front(True)
+    corium_still()
+    corium_flow()
+    geothermal_tap_side()
+    geothermal_tap_front()
+    geothermal_tap_front(True)
+    geothermal_tap_top()
+    geothermal_tap_bottom()
 
     machine_gui()
 
