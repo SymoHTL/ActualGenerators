@@ -23,6 +23,18 @@ public final class ModRenderTypes extends RenderType {
                     .setCullState(NO_CULL)
                     .createCompositeState(false));
 
+    /** Translucent boxes drawn over everything, for what is in a structure's way behind a wall. */
+    public static final RenderType FILLED_SEE_THROUGH = create(ActualGenerators.MODID + "_filled_see_through",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLE_STRIP, 1536, false, true,
+            CompositeState.builder()
+                    .setShaderState(POSITION_COLOR_SHADER)
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setDepthTestState(NO_DEPTH_TEST)
+                    .setCullState(NO_CULL)
+                    .createCompositeState(false));
+
     private ModRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize,
                            boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);

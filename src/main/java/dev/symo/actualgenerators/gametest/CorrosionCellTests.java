@@ -220,15 +220,24 @@ public final class CorrosionCellTests {
         }
         helper.assertValueEqual(cell.redstoneMode(), first, "cycling all the way round returns to the start");
 
-        // Every face button must land on the face it names, for the kind it names.
+        // Every face button must land on the face it names, for the kind it names; a kind the
+        // machine does not move has no faces to configure and its buttons are refused.
         for (TransferKind kind : TransferKind.material()) {
             for (RelativeSide side : RelativeSide.all()) {
                 IoMode before = cell.sideConfig().get(kind, side);
-                menu.clickMenuButton(player, MachineMenu.BUTTON_SIDES_START + kind.ordinal() * 6 + side.ordinal());
-                helper.assertValueEqual(cell.sideConfig().get(kind, side), before.next(),
-                        "button for " + kind + "/" + side + " changed the wrong face");
+                boolean taken = menu.clickMenuButton(player, MachineMenu.BUTTON_SIDES_START + kind.ordinal() * 6 + side.ordinal());
+                if (menu.supportsKind(kind)) {
+                    helper.assertTrue(taken, "button for " + kind + "/" + side + " should be taken");
+                    helper.assertValueEqual(cell.sideConfig().get(kind, side), before.next(),
+                            "button for " + kind + "/" + side + " changed the wrong face");
+                } else {
+                    helper.assertTrue(!taken, "a cell has no " + kind + " faces to offer");
+                    helper.assertValueEqual(cell.sideConfig().get(kind, side), before, kind + " face left alone");
+                }
             }
         }
+        helper.assertTrue(menu.supportsKind(TransferKind.ITEM) && menu.supportsKind(TransferKind.ENERGY)
+                && !menu.supportsKind(TransferKind.FLUID), "a cell moves items and energy and has no tank");
 
         helper.assertTrue(!menu.clickMenuButton(player, 9999), "unknown buttons must be rejected");
         helper.succeed();

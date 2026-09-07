@@ -1,5 +1,7 @@
 package dev.symo.actualgenerators.registry;
 
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.tags.FluidTags;
 import dev.symo.actualgenerators.ActualGenerators;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -28,12 +30,32 @@ public final class ModTags {
         }
     }
 
+    public static final class Fluids {
+        /** Full heat on an Annihilation Furnace floor: Corium. */
+        public static final TagKey<Fluid> ANNIHILATION_HEAT_STRONG = tag("annihilation_heat/strong");
+        /** Poor heat: lava. Enough to run, not enough to run well. */
+        public static final TagKey<Fluid> ANNIHILATION_HEAT_WEAK = tag("annihilation_heat/weak");
+
+        private Fluids() {
+        }
+
+        private static TagKey<Fluid> tag(String name) {
+            return FluidTags.create(ResourceLocation.fromNamespaceAndPath(ActualGenerators.MODID, name));
+        }
+    }
+
     public static final class Blocks {
         /**
          * What a Photovore will graze on. A whitelist rather than "anything that glows", so it
          * never eats a beacon, a portal, or a lava lake — and so packs can decide what counts.
          */
         public static final TagKey<Block> PHOTOVORE_FOOD = tag("photovore_food");
+
+        /**
+         * Blocks the Annihilation Furnace turns away whatever their hardness says: shulker boxes
+         * by default, since a full one would take its contents with it. Packs add what they like.
+         */
+        public static final TagKey<Block> ANNIHILATION_REFUSED = tag("annihilation_refused");
 
         private Blocks() {
         }

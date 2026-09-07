@@ -1,0 +1,4 @@
+// 1.21.1	2026-09-06T12:38:31.4437399	Tags for minecraft:fluid mod id actualgenerators
+c16cb3f2621263e2700b1fdc72249ffd10bd0033 data/actualgenerators/tags/fluid/annihilation_heat/strong.json
+9fa2db0c3bb4bf9ed90554cacefc9aa8a502b765 data/actualgenerators/tags/fluid/annihilation_heat/weak.json
+c16cb3f2621263e2700b1fdc72249ffd10bd0033 data/minecraft/tags/fluid/lava.json

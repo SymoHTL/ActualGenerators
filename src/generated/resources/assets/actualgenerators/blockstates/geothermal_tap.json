@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=east,formed=false": {
+      "model": "actualgenerators:block/geothermal_tap",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "actualgenerators:block/geothermal_tap_formed_east"
+    },
+    "facing=north,formed=false": {
+      "model": "actualgenerators:block/geothermal_tap"
+    },
+    "facing=north,formed=true": {
+      "model": "actualgenerators:block/geothermal_tap_formed_north"
+    },
+    "facing=south,formed=false": {
+      "model": "actualgenerators:block/geothermal_tap",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "actualgenerators:block/geothermal_tap_formed_south"
+    },
+    "facing=west,formed=false": {
+      "model": "actualgenerators:block/geothermal_tap",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "actualgenerators:block/geothermal_tap_formed_west"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "actualgenerators:block/machine_casing"
+    },
+    "formed=true": {
+      "model": "actualgenerators:block/machine_casing_formed"
+    }
+  }
+}

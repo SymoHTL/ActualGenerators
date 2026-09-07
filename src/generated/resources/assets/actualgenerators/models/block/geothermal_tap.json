@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/geothermal_tap_bottom",
+    "front": "actualgenerators:block/geothermal_tap_front",
+    "side": "actualgenerators:block/geothermal_tap_side",
+    "top": "actualgenerators:block/geothermal_tap_top"
+  }
+}

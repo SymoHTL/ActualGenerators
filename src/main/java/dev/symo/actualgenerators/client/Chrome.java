@@ -288,6 +288,17 @@ final class Chrome {
                 .orElse(namespace);
     }
 
+    /** A column of the fluid's still sprite, tiled up from the bottom and cut to the height asked for. */
+    static void drawFluidColumn(GuiGraphics graphics, FluidStack fluid, int x, int y, int width, int height) {
+        graphics.enableScissor(x, y, x + width, y + height);
+        for (int row = y + height - 16; row > y - 16; row -= 16) {
+            for (int column = x; column < x + width; column += 16) {
+                drawFluid(graphics, fluid, column, row);
+            }
+        }
+        graphics.disableScissor();
+    }
+
     private static void drawFluid(GuiGraphics graphics, FluidStack fluid, int x, int y) {
         IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(fluid.getFluid());
         ResourceLocation still = extensions.getStillTexture(fluid);

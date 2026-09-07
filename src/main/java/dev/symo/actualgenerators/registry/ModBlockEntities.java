@@ -1,5 +1,6 @@
 package dev.symo.actualgenerators.registry;
 
+import dev.symo.actualgenerators.generator.GeothermalTapBlockEntity;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.generator.CorrosionCellBlockEntity;
 import dev.symo.actualgenerators.generator.EnchantmentCombustorBlockEntity;
@@ -25,6 +26,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import dev.symo.actualgenerators.generator.AnnihilationFurnaceBlockEntity;
+import dev.symo.actualgenerators.machine.multiblock.HatchBlockEntity;
 
 /**
  * Block entity registration.
@@ -46,6 +49,9 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HydrostaticGeneratorBlockEntity>>
             HYDROSTATIC_GENERATOR = registerMachine(
                     "hydrostatic_generator", HydrostaticGeneratorBlockEntity::new, ModBlocks.HYDROSTATIC_GENERATOR);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GeothermalTapBlockEntity>> GEOTHERMAL_TAP =
+            registerMachine("geothermal_tap", GeothermalTapBlockEntity::new, ModBlocks.GEOTHERMAL_TAP);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PhotovoreBlockEntity>> PHOTOVORE =
             registerMachine("photovore", PhotovoreBlockEntity::new, ModBlocks.PHOTOVORE);
@@ -74,6 +80,18 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ResonanceCrusherBlockEntity>>
             RESONANCE_CRUSHER = registerMachine(
                     "resonance_crusher", ResonanceCrusherBlockEntity::new, ModBlocks.RESONANCE_CRUSHER);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AnnihilationFurnaceBlockEntity>>
+            ANNIHILATION_FURNACE = registerMachine(
+                    "annihilation_furnace", AnnihilationFurnaceBlockEntity::new, ModBlocks.ANNIHILATION_FURNACE);
+
+    /** One type for every hatch: the block says what kind, the entity only remembers its controller. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HatchBlockEntity>> HATCH =
+            BLOCK_ENTITIES.register("hatch",
+                    () -> BlockEntityType.Builder.of(HatchBlockEntity::new,
+                            ModBlocks.ITEM_HATCH.get(), ModBlocks.ENERGY_HATCH.get(), ModBlocks.REDSTONE_HATCH.get(),
+                            ModBlocks.FLUID_HATCH.get())
+                            .build(null));
 
     /**
      * The Logic Port is not a machine: it has no buffer, no upgrades of the machine kind and no
@@ -110,6 +128,11 @@ public final class ModBlockEntities {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, LOGIC_PORT.get(), LinkPortBlockEntity::passthrough);
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, LOGIC_PORT.get(), LinkPortBlockEntity::passthrough);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, LOGIC_PORT.get(), LinkPortBlockEntity::passthrough);
+        // A hatch is a proxy for its controller: present whatever the structure is doing, empty
+        // until it is formed, so nothing ever has to be invalidated.
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, HATCH.get(), HatchBlockEntity::items);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, HATCH.get(), HatchBlockEntity::energy);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, HATCH.get(), HatchBlockEntity::fluids);
     }
 
     private static <T extends MachineBlockEntity> void registerMachineCapabilities(RegisterCapabilitiesEvent event,
@@ -118,6 +141,10 @@ public final class ModBlockEntities {
                 Capabilities.EnergyStorage.BLOCK,
                 type,
                 (machine, side) -> machine.energyForSide(side));
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                type,
+                (machine, side) -> machine.fluidsForSide(side));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 type,

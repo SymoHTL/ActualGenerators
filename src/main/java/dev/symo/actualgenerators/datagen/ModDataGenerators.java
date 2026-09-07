@@ -35,11 +35,13 @@ public final class ModDataGenerators {
         generator.addProvider(event.includeClient(), new ModBlockStateProvider(output, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModItemModelProvider(output, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
+        generator.addProvider(event.includeClient(), new ModGuideStructureProvider(output));
 
         ModBlockTagsProvider blockTags = new ModBlockTagsProvider(output, registries, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTags);
         generator.addProvider(event.includeServer(),
                 new ModItemTagsProvider(output, registries, blockTags.contentsGetter(), existingFileHelper));
+        generator.addProvider(event.includeServer(), new ModFluidTagsProvider(output, registries, existingFileHelper));
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output, registries));
         generator.addProvider(event.includeServer(), new ModGameTestStructureProvider(output));
         generator.addProvider(event.includeServer(), new LootTableProvider(

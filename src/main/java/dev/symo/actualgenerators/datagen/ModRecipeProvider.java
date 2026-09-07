@@ -141,6 +141,67 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_frame", hasFrame())
                 .save(output);
 
+        // Multiblocks. The casing is made by the four because a box needs dozens; a hatch is a
+        // casing with the thing it lets through; the controller is the late-game frame recipe.
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.MACHINE_CASING.get(), 4)
+                .pattern("III")
+                .pattern("I I")
+                .pattern("III")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_frame", hasFrame())
+                .save(output);
+        // The tap's plate: casing with copper through it round a block of magma, four at a time.
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModItems.GEOTHERMAL_CASING.get(), 4)
+                .pattern("PCP")
+                .pattern("CMC")
+                .pattern("PCP")
+                .define('P', Tags.Items.INGOTS_COPPER)
+                .define('C', ModItems.MACHINE_CASING.get())
+                .define('M', Items.MAGMA_BLOCK)
+                .unlockedBy("has_casing", has(ModItems.MACHINE_CASING.get()))
+                .save(output);
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, ModItems.ITEM_HATCH.get())
+                .requires(ModItems.MACHINE_CASING.get())
+                .requires(Tags.Items.CHESTS_WOODEN)
+                .unlockedBy("has_casing", has(ModItems.MACHINE_CASING.get()))
+                .save(output);
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, ModItems.ENERGY_HATCH.get())
+                .requires(ModItems.MACHINE_CASING.get())
+                .requires(Tags.Items.STORAGE_BLOCKS_REDSTONE)
+                .unlockedBy("has_casing", has(ModItems.MACHINE_CASING.get()))
+                .save(output);
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, ModItems.REDSTONE_HATCH.get())
+                .requires(ModItems.MACHINE_CASING.get())
+                .requires(Items.REDSTONE_TORCH)
+                .unlockedBy("has_casing", has(ModItems.MACHINE_CASING.get()))
+                .save(output);
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, ModItems.FLUID_HATCH.get())
+                .requires(ModItems.MACHINE_CASING.get())
+                .requires(Items.BUCKET)
+                .unlockedBy("has_casing", has(ModItems.MACHINE_CASING.get()))
+                .save(output);
+        // A rod with a hot bulb: the probe is what a player makes before the first casing.
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.THERMAL_PROBE.get())
+                .pattern("R")
+                .pattern("C")
+                .pattern("I")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', Tags.Items.INGOTS_COPPER)
+                .define('I', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_copper", has(Tags.Items.INGOTS_COPPER))
+                .save(output);
+        // Magma for the heat, copper for the pipe: the tap is a mid-game frame recipe.
+        machine(output, ModItems.GEOTHERMAL_TAP.get(), " M ", "CFC", " M ")
+                .define('M', Items.MAGMA_BLOCK)
+                .define('C', Tags.Items.INGOTS_COPPER)
+                .unlockedBy("has_frame", hasFrame())
+                .save(output);
+        machine(output, ModItems.ANNIHILATION_FURNACE.get(), " O ", "NFN", " O ")
+                .define('O', Tags.Items.OBSIDIANS)
+                .define('N', Tags.Items.INGOTS_NETHERITE)
+                .unlockedBy("has_frame", hasFrame())
+                .save(output);
+
         // Storage and processing cost blocks rather than ingots: they are the step up.
         machine(output, ModItems.SURGE_BANK.get(), " R ", "CFC", " R ")
                 .define('R', Blocks.REDSTONE_BLOCK)

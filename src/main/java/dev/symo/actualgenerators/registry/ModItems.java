@@ -1,5 +1,9 @@
 package dev.symo.actualgenerators.registry;
 
+import dev.symo.actualgenerators.machine.multiblock.HatchBlockItem;
+import dev.symo.actualgenerators.item.ThermalProbeItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.BucketItem;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.item.ConfigCardItem;
 import dev.symo.actualgenerators.item.FilterItem;
@@ -52,6 +56,10 @@ public final class ModItems {
     public static final DeferredItem<ConfigCardItem> CONFIG_CARD =
             ITEMS.registerItem("config_card", properties -> new ConfigCardItem(properties.stacksTo(1)));
 
+    /** Reads the heat pocket under the chunk the player stands in, before a tap is built. */
+    public static final DeferredItem<ThermalProbeItem> THERMAL_PROBE =
+            ITEMS.registerItem("thermal_probe", properties -> new ThermalProbeItem(properties.stacksTo(1)));
+
     /**
      * Crushed metal, one step short of an ingot.
      *
@@ -80,6 +88,13 @@ public final class ModItems {
     public static final DeferredItem<net.minecraft.world.item.BlockItem> HYDROSTATIC_GENERATOR =
             ITEMS.registerSimpleBlockItem(ModBlocks.HYDROSTATIC_GENERATOR);
 
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> GEOTHERMAL_TAP =
+            ITEMS.registerSimpleBlockItem(ModBlocks.GEOTHERMAL_TAP);
+
+    /** A bucket of Corium: the tap fills it, the furnace floor takes it. Never crafted. */
+    public static final DeferredItem<BucketItem> CORIUM_BUCKET = ITEMS.registerItem("corium_bucket",
+            properties -> new BucketItem(ModFluids.CORIUM.get(), properties.craftRemainder(Items.BUCKET).stacksTo(1)));
+
     public static final DeferredItem<net.minecraft.world.item.BlockItem> PHOTOVORE =
             ITEMS.registerSimpleBlockItem(ModBlocks.PHOTOVORE);
 
@@ -106,6 +121,27 @@ public final class ModItems {
 
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LOGIC_PORT =
             ITEMS.registerSimpleBlockItem(ModBlocks.LOGIC_PORT);
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> MACHINE_CASING =
+            ITEMS.registerSimpleBlockItem(ModBlocks.MACHINE_CASING);
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> GEOTHERMAL_CASING =
+            ITEMS.registerSimpleBlockItem(ModBlocks.GEOTHERMAL_CASING);
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ITEM_HATCH =
+            ITEMS.registerItem("item_hatch", properties -> new HatchBlockItem(ModBlocks.ITEM_HATCH.get(), properties));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ENERGY_HATCH =
+            ITEMS.registerItem("energy_hatch", properties -> new HatchBlockItem(ModBlocks.ENERGY_HATCH.get(), properties));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> REDSTONE_HATCH =
+            ITEMS.registerItem("redstone_hatch", properties -> new HatchBlockItem(ModBlocks.REDSTONE_HATCH.get(), properties));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> FLUID_HATCH =
+            ITEMS.registerItem("fluid_hatch", properties -> new HatchBlockItem(ModBlocks.FLUID_HATCH.get(), properties));
+
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ANNIHILATION_FURNACE =
+            ITEMS.registerSimpleBlockItem(ModBlocks.ANNIHILATION_FURNACE);
 
     /** Reach, one tier at a time. The last one a port will hold also reaches into other dimensions. */
     public static final DeferredItem<LinkUpgradeItem> LINK_RANGE_UPGRADE =

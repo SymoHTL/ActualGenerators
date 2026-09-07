@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=east,formed=false": {
+      "model": "actualgenerators:block/redstone_hatch"
+    },
+    "facing=east,formed=true": {
+      "model": "actualgenerators:block/redstone_hatch_formed"
+    },
+    "facing=north,formed=false": {
+      "model": "actualgenerators:block/redstone_hatch"
+    },
+    "facing=north,formed=true": {
+      "model": "actualgenerators:block/redstone_hatch_formed"
+    },
+    "facing=south,formed=false": {
+      "model": "actualgenerators:block/redstone_hatch"
+    },
+    "facing=south,formed=true": {
+      "model": "actualgenerators:block/redstone_hatch_formed"
+    },
+    "facing=west,formed=false": {
+      "model": "actualgenerators:block/redstone_hatch"
+    },
+    "facing=west,formed=true": {
+      "model": "actualgenerators:block/redstone_hatch_formed"
+    }
+  }
+}

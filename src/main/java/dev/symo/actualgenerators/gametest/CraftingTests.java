@@ -36,6 +36,10 @@ public final class CraftingTests {
 
         for (var holder : ModItems.ITEMS.getEntries()) {
             Item item = holder.get();
+            if (item == ModItems.CORIUM_BUCKET.get()) {
+                // The tap fills it; a recipe for corium would be a recipe for the furnace's fuel.
+                continue;
+            }
             if (!isObtainable(helper, item)) {
                 missing.add(holder.getId().toString());
             }

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "actualgenerators:block/machine_casing",
+    "front": "actualgenerators:block/annihilation_furnace_front",
+    "side": "actualgenerators:block/machine_casing",
+    "top": "actualgenerators:block/machine_casing"
+  }
+}

@@ -1,5 +1,7 @@
 package dev.symo.actualgenerators.registry;
 
+import dev.symo.actualgenerators.menu.RedstoneHatchMenu;
+import dev.symo.actualgenerators.menu.GeothermalTapMenu;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.menu.CorrosionCellMenu;
 import dev.symo.actualgenerators.menu.EnchantmentCombustorMenu;
@@ -22,6 +24,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import dev.symo.actualgenerators.menu.AnnihilationFurnaceMenu;
 
 public final class ModMenus {
     public static final DeferredRegister<MenuType<?>> MENUS =
@@ -32,6 +35,12 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<HydrostaticGeneratorMenu>> HYDROSTATIC_GENERATOR =
             MENUS.register("hydrostatic_generator", () -> IMenuTypeExtension.create(HydrostaticGeneratorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<GeothermalTapMenu>> GEOTHERMAL_TAP =
+            MENUS.register("geothermal_tap", () -> IMenuTypeExtension.create(GeothermalTapMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<RedstoneHatchMenu>> REDSTONE_HATCH =
+            MENUS.register("redstone_hatch", () -> IMenuTypeExtension.create(RedstoneHatchMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PhotovoreMenu>> PHOTOVORE =
             MENUS.register("photovore", () -> IMenuTypeExtension.create(PhotovoreMenu::new));
@@ -44,6 +53,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<EnchantmentCombustorMenu>> ENCHANTMENT_COMBUSTOR =
             MENUS.register("enchantment_combustor", () -> IMenuTypeExtension.create(EnchantmentCombustorMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<AnnihilationFurnaceMenu>> ANNIHILATION_FURNACE =
+            MENUS.register("annihilation_furnace", () -> IMenuTypeExtension.create(AnnihilationFurnaceMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<EnergyInjectorMenu>> ENERGY_INJECTOR =
             MENUS.register("energy_injector",

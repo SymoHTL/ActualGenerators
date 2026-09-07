@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "F": {
+      "item": "actualgenerators:machine_frame"
+    },
+    "N": {
+      "tag": "c:ingots/netherite"
+    },
+    "O": {
+      "tag": "c:obsidians"
+    }
+  },
+  "pattern": [
+    " O ",
+    "NFN",
+    " O "
+  ],
+  "result": {
+    "count": 1,
+    "id": "actualgenerators:annihilation_furnace"
+  }
+}

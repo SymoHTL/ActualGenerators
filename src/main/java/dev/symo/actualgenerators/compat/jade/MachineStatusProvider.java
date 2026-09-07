@@ -1,5 +1,6 @@
 package dev.symo.actualgenerators.compat.jade;
 
+import dev.symo.actualgenerators.generator.AnnihilationFurnaceBlockEntity;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.machine.MachineBlockEntity;
 import dev.symo.actualgenerators.processing.ResonanceCrusherBlockEntity;
@@ -16,6 +17,8 @@ import snownee.jade.api.ui.IElement;
 import snownee.jade.api.ui.IElementHelper;
 
 import java.util.Locale;
+import dev.symo.actualgenerators.machine.multiblock.MultiblockControllerBlockEntity;
+import net.minecraft.ChatFormatting;
 
 /**
  * What a machine is up to, as the same two bars its own window draws.
@@ -45,6 +48,11 @@ public class MachineStatusProvider implements IBlockComponentProvider, IServerDa
     private static final String KEY_WARMUP = "Warmup";
     private static final String KEY_FREQUENCY = "Frequency";
     private static final String KEY_TUNED = "Tuned";
+    private static final String KEY_FORMED = "Formed";
+    private static final String KEY_STRUCTURE = "Structure";
+    private static final String KEY_BATCH = "Batch";
+    private static final String KEY_EFFICIENCY = "Efficiency";
+    private static final String KEY_HEAT = "Heat";
 
     // Read off the GUI sheet rather than picked: the arrow's copper and the ramp bar's violet, with
     // the next shade down the same palette ramp as the gradient. A tooltip that recoloured what the
@@ -90,6 +98,22 @@ public class MachineStatusProvider implements IBlockComponentProvider, IServerDa
                 data.putBoolean(KEY_TUNED, crusher.isTuned());
             }
         }
+
+        if (machine instanceof MultiblockControllerBlockEntity controller) {
+            // Whether the box stands is the first thing a player at a controller wants to know,
+            // and the blockstate alone does not say how big it came out.
+            data.putBoolean(KEY_FORMED, controller.isFormed());
+            if (controller.structure() != null) {
+                data.putString(KEY_STRUCTURE, controller.structure().describe());
+                if (controller.hatchItems() != null) {
+                    data.putInt(KEY_BATCH, controller.maxBatch());
+                }
+                if (controller instanceof AnnihilationFurnaceBlockEntity furnace) {
+                    data.putInt(KEY_EFFICIENCY, (furnace.efficiencyPermille() + 5) / 10);
+                    data.putInt(KEY_HEAT, (furnace.heatPermille() + 5) / 10);
+                }
+            }
+        }
     }
 
     @Override
@@ -113,6 +137,22 @@ public class MachineStatusProvider implements IBlockComponentProvider, IServerDa
                     warmup
                             ? Component.translatable("jade.actualgenerators.warmup", ramp, value)
                             : Component.translatable("jade.actualgenerators.overclock", ramp, multiplier(value))));
+        }
+
+        if (data.contains(KEY_FORMED)) {
+            if (!data.getBoolean(KEY_FORMED)) {
+                tooltip.add(Component.translatable("jade.actualgenerators.unformed").withStyle(ChatFormatting.RED));
+            } else if (data.contains(KEY_BATCH)) {
+                tooltip.add(Component.translatable("jade.actualgenerators.structure",
+                        data.getString(KEY_STRUCTURE), data.getInt(KEY_BATCH)));
+            } else {
+                tooltip.add(Component.translatable("jade.actualgenerators.structure.plain", data.getString(KEY_STRUCTURE)));
+            }
+        }
+        if (data.contains(KEY_EFFICIENCY)) {
+            int efficiency = data.getInt(KEY_EFFICIENCY);
+            tooltip.add(Component.translatable("jade.actualgenerators.efficiency", efficiency, data.getInt(KEY_HEAT))
+                    .withStyle(efficiency < 100 ? ChatFormatting.GOLD : ChatFormatting.GREEN));
         }
 
         if (data.contains(KEY_FREQUENCY)) {

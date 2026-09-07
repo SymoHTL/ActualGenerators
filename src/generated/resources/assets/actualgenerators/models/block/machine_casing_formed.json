@@ -1,0 +1,13 @@
+{
+  "loader": "actualgenerators:connected_casing",
+  "textures": {
+    "frame": "actualgenerators:block/machine_casing_formed",
+    "panel": "actualgenerators:block/machine_casing_panel",
+    "particle": "actualgenerators:block/machine_casing_formed",
+    "variant_1": "actualgenerators:block/machine_casing_panel_1",
+    "variant_2": "actualgenerators:block/machine_casing_panel_2",
+    "variant_3": "actualgenerators:block/machine_casing_panel_3",
+    "variant_4": "actualgenerators:block/machine_casing_panel_4"
+  },
+  "variants": 4
+}

@@ -1,5 +1,14 @@
 package dev.symo.actualgenerators.menu;
 
+import java.util.ArrayList;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.wrapper.PlayerMainInvWrapper;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.FluidStack;
+import dev.symo.actualgenerators.machine.multiblock.MultiblockControllerBlockEntity;
+import java.util.List;
 import dev.symo.actualgenerators.machine.IoMode;
 import dev.symo.actualgenerators.machine.MachineBlockEntity;
 import dev.symo.actualgenerators.machine.MachineTier;
@@ -61,6 +70,8 @@ public abstract class MachineMenu<T extends MachineBlockEntity> extends Abstract
     public static final int BUTTON_CYCLE_REDSTONE = 0;
     /** Flips a two-way machine round. Ignored by machines that only run one way. */
     public static final int BUTTON_TOGGLE_MODE = 1;
+    /** Moves fluid between the tank and whatever container the cursor carries. */
+    public static final int BUTTON_TANK = 2;
     /** Face buttons are {@code BUTTON_SIDES_START + kind * 6 + side}. */
     public static final int BUTTON_SIDES_START = 100;
     /** Auto push/pull toggles are {@code BUTTON_AUTO_START + kind * 2 + (push ? 1 : 0)}. */
@@ -244,6 +255,73 @@ public abstract class MachineMenu<T extends MachineBlockEntity> extends Abstract
         return false;
     }
 
+    /**
+     * True when this machine's window has the side configuration button and panel.
+     *
+     * <p>False for a multiblock controller: its own faces move nothing, the hatches in its shell
+     * do, and a panel of six faces that cannot be opened would be a lie.
+     */
+    public boolean hasSideConfig() {
+        return true;
+    }
+
+    /**
+     * Whether the machine handles this kind at all, so the side panel offers faces only for what
+     * it can move: a bank with six item faces to configure would be six lies.
+     */
+    public boolean supportsKind(TransferKind kind) {
+        return switch (kind) {
+            case ITEM -> machine.itemsForSide(null) != null;
+            case FLUID -> machine.fluidsForSide(null) != null;
+            case ENERGY -> true;
+            case REDSTONE -> false;
+        };
+    }
+
+    /** The kinds the side panel has tabs for, in tab order. */
+    public List<TransferKind> sideKinds() {
+        List<TransferKind> kinds = new ArrayList<>(3);
+        for (TransferKind kind : TransferKind.material()) {
+            if (supportsKind(kind)) {
+                kinds.add(kind);
+            }
+        }
+        return kinds;
+    }
+
+    /** Whether the side panel starts open: a window opened to set up one face has nothing else to show first. */
+    public boolean sidePanelOpenAtStart() {
+        return false;
+    }
+
+    /** A face nothing can be set on: it looks into a structure. Machines have none. */
+    public boolean sideBlocked(RelativeSide side) {
+        return false;
+    }
+
+    /** Whether the window draws a fluid tank beside the gauge. */
+    public boolean hasTank() {
+        return false;
+    }
+
+    /** The tank's capacity in millibuckets, on a window that has one. */
+    public int tankCapacity() {
+        return 0;
+    }
+
+    /** What the tank holds, for drawing; a window that has one says what and how much. */
+    public FluidStack tankFluid() {
+        return FluidStack.EMPTY;
+    }
+
+    /**
+     * Boxes this window draws beyond the shared chrome, so the layout test can see them. A
+     * screen with coordinates the test cannot see is a screen that will overlap sooner or later.
+     */
+    public List<MachineLayout.Box> extraChrome() {
+        return List.of();
+    }
+
     /** How far through the current operation, 0 to 1. Zero for machines with no operation. */
     public double progress() {
         return 0;
@@ -309,9 +387,18 @@ public abstract class MachineMenu<T extends MachineBlockEntity> extends Abstract
             machine.setRedstoneMode(machine.redstoneMode().next());
             return true;
         }
+        if (id == BUTTON_TANK) {
+            return hasTank() && moveFluidThroughCursor(player);
+        }
+        if (!hasSideConfig() && id >= BUTTON_SIDES_START) {
+            return false;
+        }
         int sideButton = id - BUTTON_SIDES_START;
         if (sideButton >= 0 && sideButton < TransferKind.material().length * 6) {
             TransferKind kind = TransferKind.byOrdinal(sideButton / 6);
+            if (!supportsKind(kind)) {
+                return false;
+            }
             RelativeSide side = RelativeSide.byOrdinal(sideButton % 6);
             machine.sideConfig().cycle(kind, side);
             machine.invalidateCapabilitiesOnSideChange();
@@ -319,9 +406,13 @@ public abstract class MachineMenu<T extends MachineBlockEntity> extends Abstract
         }
         int autoButton = id - BUTTON_AUTO_START;
         if (autoButton >= 0 && autoButton < TransferKind.material().length * 2) {
+            TransferKind kind = TransferKind.byOrdinal(autoButton / 2);
+            if (!supportsKind(kind)) {
+                return false;
+            }
             // No capability invalidation: the faces still expose exactly what they did. Only the
             // machine's own initiative changed, so waking it is enough.
-            machine.sideConfig().toggleAuto(TransferKind.byOrdinal(autoButton / 2), autoButton % 2 == 1);
+            machine.sideConfig().toggleAuto(kind, autoButton % 2 == 1);
             machine.wake();
             machine.requestAutoIo();
             machine.setChanged();
@@ -330,10 +421,39 @@ public abstract class MachineMenu<T extends MachineBlockEntity> extends Abstract
         return false;
     }
 
+    /**
+     * A container on the cursor, clicked on the tank: fills it from the tank, or empties it into
+     * the tank, whichever the tank's own faces allow. A stack of containers fills one and puts
+     * it in the player's inventory, or drops it, like a bucket on the block does. The cursor is
+     * replaced by the server's answer; nothing is guessed on the client.
+     */
+    private boolean moveFluidThroughCursor(Player player) {
+        IFluidHandler tank = machine.fluidsForSide(null);
+        ItemStack carried = getCarried();
+        if (tank == null || carried.isEmpty() || carried.getCapability(Capabilities.FluidHandler.ITEM) == null) {
+            return false;
+        }
+        IItemHandler inventory = new PlayerMainInvWrapper(player.getInventory());
+        FluidActionResult result = FluidUtil.tryFillContainerAndStow(carried, tank, inventory, Integer.MAX_VALUE, player, true);
+        if (!result.isSuccess()) {
+            result = FluidUtil.tryEmptyContainerAndStow(carried, tank, inventory, Integer.MAX_VALUE, player, true);
+        }
+        if (!result.isSuccess()) {
+            return false;
+        }
+        setCarried(result.getResult());
+        return true;
+    }
+
     // ------------------------------------------------------------------ vanilla plumbing
 
     @Override
     public boolean stillValid(Player player) {
+        if (machine instanceof MultiblockControllerBlockEntity controller) {
+            // Opened from a hatch at the far end of the box, the controller can be its whole length away.
+            return access.evaluate((level, pos) -> level.getBlockState(pos).is(machineBlock())
+                    && player.canInteractWithBlock(pos, 4.0 + controller.reach()), true);
+        }
         return stillValid(access, player, machineBlock());
     }
 

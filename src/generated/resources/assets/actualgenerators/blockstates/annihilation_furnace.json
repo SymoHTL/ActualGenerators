@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=east,formed=false": {
+      "model": "actualgenerators:block/annihilation_furnace",
+      "y": 90
+    },
+    "facing=east,formed=true": {
+      "model": "actualgenerators:block/annihilation_furnace_formed_east"
+    },
+    "facing=north,formed=false": {
+      "model": "actualgenerators:block/annihilation_furnace"
+    },
+    "facing=north,formed=true": {
+      "model": "actualgenerators:block/annihilation_furnace_formed_north"
+    },
+    "facing=south,formed=false": {
+      "model": "actualgenerators:block/annihilation_furnace",
+      "y": 180
+    },
+    "facing=south,formed=true": {
+      "model": "actualgenerators:block/annihilation_furnace_formed_south"
+    },
+    "facing=west,formed=false": {
+      "model": "actualgenerators:block/annihilation_furnace",
+      "y": 270
+    },
+    "facing=west,formed=true": {
+      "model": "actualgenerators:block/annihilation_furnace_formed_west"
+    }
+  }
+}

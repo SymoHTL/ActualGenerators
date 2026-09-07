@@ -59,15 +59,20 @@ public class SurgeBankBlockEntity extends MachineBlockEntity implements MenuProv
     }
 
     /**
-     * Power in through every face but the front, which is where it comes back out.
+     * Power in through every face but the front, which is where it comes back out, and the bank
+     * goes looking from the first tick: it pulls from whatever is on its input faces and pushes
+     * into whatever is at the front. A battery that had to be told to charge was a battery
+     * nobody asked for.
      *
      * <p>Not everything both ways: two banks set to push at each other would spend the rest of the
-     * game handing the same energy back and forth.
+     * game handing the same energy back and forth; the one-way faces are what stop that.
      */
     private static SideConfig defaultSides() {
         SideConfig config = SideConfig.of(IoMode.DISABLED, IoMode.DISABLED, IoMode.DISABLED);
         config.setAll(TransferKind.ENERGY, IoMode.INPUT);
         config.set(TransferKind.ENERGY, RelativeSide.FRONT, IoMode.OUTPUT);
+        config.setAuto(TransferKind.ENERGY, false, true);
+        config.setAuto(TransferKind.ENERGY, true, true);
         return config;
     }
 

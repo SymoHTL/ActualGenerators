@@ -1,5 +1,8 @@
 package dev.symo.actualgenerators.registry;
 
+import dev.symo.actualgenerators.machine.multiblock.GeothermalCasingBlock;
+import net.minecraft.world.level.block.LiquidBlock;
+import dev.symo.actualgenerators.generator.GeothermalTapBlock;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.generator.CorrosionCellBlock;
 import dev.symo.actualgenerators.generator.EnchantmentCombustorBlock;
@@ -19,6 +22,10 @@ import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import dev.symo.actualgenerators.generator.AnnihilationFurnaceBlock;
+import dev.symo.actualgenerators.machine.multiblock.HatchBlock;
+import dev.symo.actualgenerators.machine.multiblock.HatchKind;
+import dev.symo.actualgenerators.machine.multiblock.MultiblockCasingBlock;
 
 public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ActualGenerators.MODID);
@@ -42,6 +49,32 @@ public final class ModBlocks {
                     .strength(3.5F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL));
+
+    /** The wellhead on a plate of Geothermal Casing over the heat pocket under its chunk; leaves Corium behind. */
+    public static final DeferredBlock<GeothermalTapBlock> GEOTHERMAL_TAP = BLOCKS.registerBlock(
+            "geothermal_tap",
+            GeothermalTapBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE)
+                    .strength(3.5F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL));
+
+    /** Corium in the world: lava that never spreads its source, with the furnace as its only use. */
+    public static final DeferredBlock<LiquidBlock> CORIUM = BLOCKS.registerBlock(
+            "corium",
+            properties -> new LiquidBlock(ModFluids.CORIUM.get(), properties),
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE)
+                    .replaceable()
+                    .noCollission()
+                    .randomTicks()
+                    .strength(100.0F)
+                    .lightLevel(state -> 12)
+                    .pushReaction(PushReaction.DESTROY)
+                    .noLootTable()
+                    .liquid()
+                    .sound(SoundType.EMPTY));
 
     /** Eats the lighting around it. */
     public static final DeferredBlock<PhotovoreBlock> PHOTOVORE = BLOCKS.registerBlock(
@@ -133,6 +166,68 @@ public final class ModBlocks {
                     .strength(3.5F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL));
+
+    // ---------------------------------------------------------------- multiblocks
+
+    /** The wall block of every multiblock. No block entity, no tick. */
+    public static final DeferredBlock<MultiblockCasingBlock> MACHINE_CASING = BLOCKS.registerBlock(
+            "machine_casing",
+            MultiblockCasingBlock::new,
+            shell());
+
+    /** The plate under a Geothermal Fissure Tap: the bore, laid on the ground. Same block, different look. */
+    public static final DeferredBlock<GeothermalCasingBlock> GEOTHERMAL_CASING = BLOCKS.registerBlock(
+            "geothermal_casing",
+            GeothermalCasingBlock::new,
+            shell());
+
+    /** Items in and out of the controller, through the shell. */
+    public static final DeferredBlock<HatchBlock> ITEM_HATCH = BLOCKS.registerBlock(
+            "item_hatch",
+            properties -> new HatchBlock(HatchKind.ITEM, properties),
+            shell());
+
+    /** The controller's FE buffer, through the shell. */
+    public static final DeferredBlock<HatchBlock> ENERGY_HATCH = BLOCKS.registerBlock(
+            "energy_hatch",
+            properties -> new HatchBlock(HatchKind.ENERGY, properties),
+            shell());
+
+    /** A redstone signal for the controller, read where the hatch is. */
+    public static final DeferredBlock<HatchBlock> REDSTONE_HATCH = BLOCKS.registerBlock(
+            "redstone_hatch",
+            properties -> new HatchBlock(HatchKind.REDSTONE, properties),
+            shell());
+
+    /** The controller's tank, through the shell, for the machines that have one. */
+    public static final DeferredBlock<HatchBlock> FLUID_HATCH = BLOCKS.registerBlock(
+            "fluid_hatch",
+            properties -> new HatchBlock(HatchKind.FLUID, properties),
+            shell());
+
+    /** Mass into energy: the controller of a box of casing that eats blocks by their hardness. */
+    public static final DeferredBlock<AnnihilationFurnaceBlock> ANNIHILATION_FURNACE = BLOCKS.registerBlock(
+            "annihilation_furnace",
+            AnnihilationFurnaceBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .strength(5.0F, 6.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .pushReaction(PushReaction.BLOCK));
+
+    /**
+     * Shell blocks: heavy, and never moved by a piston. A piston that could push a casing out of
+     * a wall would be a way to put a block inside a sealed box without the controller hearing.
+     */
+    private static BlockBehaviour.Properties shell() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_GRAY)
+                .strength(4.0F, 6.0F)
+                .requiresCorrectToolForDrops()
+                .sound(SoundType.METAL)
+                .pushReaction(PushReaction.BLOCK);
+    }
 
     private ModBlocks() {
     }

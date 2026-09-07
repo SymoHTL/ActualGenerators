@@ -1,0 +1,10 @@
+{
+  "front": "south",
+  "loader": "actualgenerators:connected_casing",
+  "textures": {
+    "frame": "actualgenerators:block/machine_casing_formed",
+    "front": "actualgenerators:block/geothermal_tap_front_formed",
+    "panel": "actualgenerators:block/machine_casing_panel",
+    "particle": "actualgenerators:block/machine_casing_formed"
+  }
+}

@@ -1,5 +1,8 @@
 package dev.symo.actualgenerators.datagen;
 
+import net.neoforged.neoforge.client.model.generators.loaders.DynamicFluidContainerModelBuilder;
+import net.minecraft.resources.ResourceLocation;
+import dev.symo.actualgenerators.registry.ModFluids;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.registry.ModItems;
 import net.minecraft.data.PackOutput;
@@ -23,6 +26,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.DIAMOND_TIER_UPGRADE.get());
         basicItem(ModItems.NETHERITE_TIER_UPGRADE.get());
         basicItem(ModItems.MACHINE_FRAME.get());
+        basicItem(ModItems.THERMAL_PROBE.get());
         basicItem(ModItems.IRON_DUST.get());
         basicItem(ModItems.COPPER_DUST.get());
         basicItem(ModItems.GOLD_DUST.get());
@@ -33,5 +37,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.FLUX_COUPLER.get());
         basicItem(ModItems.LINK_RANGE_UPGRADE.get());
         basicItem(ModItems.UNBOUND_LINK_CARD.get());
+        // The bucket draws its fluid through NeoForge's model: the vanilla bucket shape, the corium's sprite inside.
+        withExistingParent("corium_bucket", ResourceLocation.fromNamespaceAndPath("neoforge", "item/bucket"))
+                .customLoader(DynamicFluidContainerModelBuilder::begin)
+                .fluid(ModFluids.CORIUM.get())
+                .end();
     }
 }

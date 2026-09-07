@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "coil=corner_ne,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=corner_ne,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_ne"
+    },
+    "coil=corner_nw,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=corner_nw,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_nw"
+    },
+    "coil=corner_se,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=corner_se,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_se"
+    },
+    "coil=corner_sw,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=corner_sw,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_sw"
+    },
+    "coil=none,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=none,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_plate"
+    },
+    "coil=plain,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=plain,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_plate"
+    },
+    "coil=ring_x,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=ring_x,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_x"
+    },
+    "coil=ring_z,formed=false": {
+      "model": "actualgenerators:block/geothermal_casing"
+    },
+    "coil=ring_z,formed=true": {
+      "model": "actualgenerators:block/geothermal_casing_ring_z"
+    }
+  }
+}

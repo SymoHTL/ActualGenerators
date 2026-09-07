@@ -1,5 +1,6 @@
 package dev.symo.actualgenerators.gametest;
 
+import dev.symo.actualgenerators.menu.RedstoneHatchMenu;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.generator.CorrosionCellBlockEntity;
 import dev.symo.actualgenerators.config.ServerConfig;
@@ -637,10 +638,12 @@ public final class MachineFrameworkTests {
         for (DeferredBlock<? extends MachineBlock> block : List.of(
                 ModBlocks.CORROSION_CELL,
                 ModBlocks.HYDROSTATIC_GENERATOR,
+                ModBlocks.GEOTHERMAL_TAP,
                 ModBlocks.PHOTOVORE,
                 ModBlocks.IMPACT_DYNAMO,
                 ModBlocks.SPAWNER_SIPHON,
                 ModBlocks.ENCHANTMENT_COMBUSTOR,
+                ModBlocks.ANNIHILATION_FURNACE,
                 ModBlocks.RESONANCE_CRUSHER,
                 ModBlocks.SURGE_BANK, ModBlocks.CRYSTAL_CHARGER, ModBlocks.ENERGY_INJECTOR)) {
             helper.setBlock(MACHINE, block.get());
@@ -663,6 +666,10 @@ public final class MachineFrameworkTests {
             if (menu.hasProgressArrow()) {
                 chrome.add(MachineLayout.arrow());
             }
+            if (menu.hasTank()) {
+                chrome.add(MachineLayout.tank());
+            }
+            chrome.addAll(menu.extraChrome());
             if (menu instanceof EnergyInjectorMenu) {
                 chrome.add(EnergyInjectorMenu.NETWORK_BUTTON);
             }
@@ -708,6 +715,8 @@ public final class MachineFrameworkTests {
                 NetworkOverview.EMPTY);
         assertNothingOverlaps(helper, "network_overview", NetworkOverviewMenu.chrome(), overview.slots,
                 NetworkOverviewMenu.WIDTH, NetworkOverviewMenu.HEIGHT);
+        assertNothingOverlaps(helper, "redstone_hatch", RedstoneHatchMenu.chrome(), List.of(),
+                RedstoneHatchMenu.WIDTH, RedstoneHatchMenu.HEIGHT);
 
         helper.succeed();
     }

@@ -1,5 +1,6 @@
 package dev.symo.actualgenerators.machine;
 
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import dev.symo.actualgenerators.config.ServerConfig;
 import dev.symo.actualgenerators.item.TierUpgradeItem;
 import net.minecraft.core.BlockPos;
@@ -130,6 +131,11 @@ public abstract class MachineBlockEntity extends BlockEntity {
 
     /** Slots this machine wants filled from neighbours on input faces. */
     protected @Nullable IItemHandler autoInputHandler() {
+        return null;
+    }
+
+    /** The tank this machine holds, or null for the many that hold none. The faces gate it by their fluid mode. */
+    protected @Nullable IFluidHandler fluidTank() {
         return null;
     }
 
@@ -491,6 +497,14 @@ public abstract class MachineBlockEntity extends BlockEntity {
         if (sideConfig.hasAny(TransferKind.ITEM) && sideConfig.autoAny(TransferKind.ITEM)) {
             autoIoItems(level, pos, facing);
         }
+        autoIoBeyondFaces(level, ticks);
+    }
+
+    /**
+     * The same pass, for whatever a machine moves through that is not one of its own six faces:
+     * a multiblock's hatches. Nothing by default.
+     */
+    protected void autoIoBeyondFaces(ServerLevel level, int ticks) {
     }
 
     private void autoIoEnergy(ServerLevel level, BlockPos pos, Direction facing, int ticks) {
@@ -584,35 +598,12 @@ public abstract class MachineBlockEntity extends BlockEntity {
     }
 
     private void pushItems(IItemHandler from, IItemHandler to) {
-        for (int slot = 0; slot < from.getSlots(); slot++) {
-            ItemStack extractable = from.extractItem(slot, Integer.MAX_VALUE, true);
-            if (extractable.isEmpty()) {
-                continue;
-            }
-            ItemStack leftover = ItemHandlerHelper.insertItem(to, extractable, false);
-            int moved = extractable.getCount() - leftover.getCount();
-            if (moved > 0) {
-                from.extractItem(slot, moved, false);
-            }
-        }
+        Movers.pushItems(from, to);
     }
 
     private void pullItems(IItemHandler into, IItemHandler from) {
-        for (int slot = 0; slot < from.getSlots(); slot++) {
-            ItemStack extractable = from.extractItem(slot, Integer.MAX_VALUE, true);
-            if (extractable.isEmpty()) {
-                continue;
-            }
-            ItemStack leftover = ItemHandlerHelper.insertItem(into, extractable, true);
-            int movable = extractable.getCount() - leftover.getCount();
-            if (movable <= 0) {
-                continue;
-            }
-            ItemStack taken = from.extractItem(slot, movable, false);
-            if (!taken.isEmpty()) {
-                ItemHandlerHelper.insertItem(into, taken, false);
-                wake();
-            }
+        if (Movers.pullItems(into, from)) {
+            wake();
         }
     }
 
@@ -668,6 +659,19 @@ public abstract class MachineBlockEntity extends BlockEntity {
                 mode.canInput() ? machineInputs : null,
                 mode.canOutput() ? machineOutputs : null);
         return view.isEmptyView() ? null : view;
+    }
+
+    /** The tank view a given face exposes, or null if the machine has none or that face moves no fluid. */
+    public @Nullable IFluidHandler fluidsForSide(@Nullable Direction side) {
+        IFluidHandler tank = fluidTank();
+        if (tank == null) {
+            return null;
+        }
+        if (side == null) {
+            return tank;
+        }
+        IoMode mode = sideConfig.get(TransferKind.FLUID, facing(getBlockState()), side);
+        return mode.isActive() ? new SidedFluidHandler(tank, mode) : null;
     }
 
     protected Direction facing(BlockState state) {

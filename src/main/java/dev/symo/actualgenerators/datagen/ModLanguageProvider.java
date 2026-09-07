@@ -18,6 +18,11 @@ public class ModLanguageProvider extends LanguageProvider {
 
         add(ModBlocks.CORROSION_CELL.get(), "Corrosion Cell");
         add(ModBlocks.HYDROSTATIC_GENERATOR.get(), "Hydrostatic Generator");
+        add(ModBlocks.GEOTHERMAL_TAP.get(), "Geothermal Fissure Tap");
+        add(ModBlocks.CORIUM.get(), "Corium");
+        add(ModItems.CORIUM_BUCKET.get(), "Corium Bucket");
+        add(ModItems.THERMAL_PROBE.get(), "Thermal Probe");
+        add("fluid_type.actualgenerators.corium", "Corium");
         add(ModBlocks.PHOTOVORE.get(), "Photovore");
         add(ModBlocks.IMPACT_DYNAMO.get(), "Impact Dynamo");
         add(ModBlocks.SPAWNER_SIPHON.get(), "Spawner Siphon");
@@ -26,6 +31,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add(ModBlocks.CRYSTAL_CHARGER.get(), "Crystal Charger");
         add(ModBlocks.RESONANCE_CRUSHER.get(), "Resonance Crusher");
         add(ModBlocks.LOGIC_PORT.get(), "Logic Port");
+        add(ModBlocks.MACHINE_CASING.get(), "Machine Casing");
+        add(ModBlocks.GEOTHERMAL_CASING.get(), "Geothermal Casing");
+        add(ModBlocks.ITEM_HATCH.get(), "Item Hatch");
+        add(ModBlocks.ENERGY_HATCH.get(), "Energy Hatch");
+        add(ModBlocks.REDSTONE_HATCH.get(), "Redstone Hatch");
+        add(ModBlocks.FLUID_HATCH.get(), "Fluid Hatch");
+        add(ModBlocks.ANNIHILATION_FURNACE.get(), "Annihilation Furnace");
 
         add(ModItems.ENERGY_UPGRADE.get(), "Energy Upgrade");
         add(ModItems.SPEED_UPGRADE.get(), "Speed Upgrade");
@@ -54,6 +66,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add(ModItems.GOLD_DUST.get(), "Gold Dust");
         add(ModItems.LINKING_TOOL.get(), "Linking Tool");
         add("item.actualgenerators.linking_tool.hint", "Use on a pad or injector to pick its network");
+        add("item.actualgenerators.thermal_probe.hint", "Use: reads the heat pocket under this chunk");
+        add("item.actualgenerators.thermal_probe.none", "No heat pocket under this chunk");
+        add("item.actualgenerators.thermal_probe.pocket", "Heat pocket %s / %s FE (%s%%) \u00b7 full rating with the box floor at y=%s or lower");
         add("item.actualgenerators.linking_tool.hint.held", "Held, it shows every pad, its network, the centre and the reach \u00b7 Crouch-use: what it shows");
         add(ModItems.FILTER.get(), "Filter");
         add("item.actualgenerators.filter.blank", "Blank: anything passes");
@@ -114,6 +129,56 @@ public class ModLanguageProvider extends LanguageProvider {
         add("gui.actualgenerators.crusher.calibrating", "Calibrating");
         add("gui.actualgenerators.crusher.calibrating.hint", "First run on a material takes longer and pays no bonus");
         add("gui.actualgenerators.crusher.batch", "Crushing %s at a time");
+        add("gui.actualgenerators.multiblock.unformed", "Not formed");
+        add("gui.actualgenerators.multiblock.size_hint", "W %s \u00b7 H %s \u00b7 D %s");
+        add("gui.actualgenerators.multiblock.shell_hint", "Press the eye to see the shape");
+        add("gui.actualgenerators.multiblock.batch", "Batch %s");
+        add("gui.actualgenerators.multiblock.preview", "Preview the box");
+        add("gui.actualgenerators.multiblock.preview.hint", "Ghosts: what to build \u00b7 Red: in the way \u00b7 Orange: corium \u00b7 Hatch in hand: green where it may go");
+        add("gui.actualgenerators.multiblock.preview.label", "%s \u00b7 %s inside");
+        add("gui.actualgenerators.multiblock.width", "Width: %s (%s to %s)");
+        add("gui.actualgenerators.multiblock.height", "Height: %s (%s to %s)");
+        add("gui.actualgenerators.multiblock.depth", "Depth: %s (%s to %s)");
+        add("gui.actualgenerators.multiblock.stepper.hint", "Arrows step %s \u00b7 shift or right-click %s");
+        add("gui.actualgenerators.furnace.heat", "Heat %s%%");
+        add("gui.actualgenerators.furnace.heat.none", "No heat");
+        add("gui.actualgenerators.furnace.heat.hint", "Corium on the floor: full heat. Lava: poor. A bucket per floor block");
+        add("gui.actualgenerators.furnace.load", "Load %s / %s");
+        add("gui.actualgenerators.furnace.load.hint", "Items held over the batch. Past it, every item pays less");
+        add("gui.actualgenerators.furnace.efficiency", "Efficiency: %s%%");
+        add("gui.actualgenerators.furnace.efficiency.parts", "Heat %s%% \u00d7 load %s%%");
+        add("gui.actualgenerators.furnace.efficiency.hint", "The share of its worth every item pays");
+        add("block.actualgenerators.annihilation_furnace.floor_full", "The floor is full");
+        add("block.actualgenerators.annihilation_furnace.floor_empty", "Nothing on the floor to take");
+        add("block.actualgenerators.hatch.unformed", "Not formed: nothing behind this hatch yet");
+        add("jade.actualgenerators.hatch.unformed", "Not formed");
+        add("jade.actualgenerators.hatch.pulls", "pulls in");
+        add("jade.actualgenerators.hatch.pushes", "pushes out");
+        add("gui.actualgenerators.side.blocked", "Inside the structure");
+        add("gui.actualgenerators.hatch.level", "Giving off %s");
+        add("gui.actualgenerators.hatch.mode.control", "Control");
+        add("gui.actualgenerators.hatch.mode.control.hint", "A signal here counts as a signal at the controller");
+        add("gui.actualgenerators.hatch.mode.formed", "Formed");
+        add("gui.actualgenerators.hatch.mode.formed.hint", "Full signal while the box stands");
+        add("gui.actualgenerators.hatch.mode.working", "Working");
+        add("gui.actualgenerators.hatch.mode.working.hint", "Full signal while the controller is working");
+        add("gui.actualgenerators.hatch.mode.energy", "Energy");
+        add("gui.actualgenerators.hatch.mode.energy.hint", "How full the buffer is, 0 to 15");
+        add("gui.actualgenerators.hatch.mode.items", "Items");
+        add("gui.actualgenerators.hatch.mode.items.hint", "How full the slots are, 0 to 15");
+        add("gui.actualgenerators.hatch.mode.efficiency", "Efficiency");
+        add("gui.actualgenerators.hatch.mode.efficiency.hint", "The controller's efficiency, 0 to 15");
+        add("gui.actualgenerators.pocket", "Pocket %s%%");
+        add("gui.actualgenerators.pocket.none", "No heat pocket here");
+        add("gui.actualgenerators.pocket.hint", "Heat left under this chunk. It regrows at a trickle");
+        add("gui.actualgenerators.depth_factor", "Depth %s%%");
+        add("gui.actualgenerators.depth_factor.none", "Too high up");
+        add("gui.actualgenerators.tank", "%s: %s / %s mB");
+        add("gui.actualgenerators.tank.empty", "Empty tank, %s mB");
+        add("gui.actualgenerators.tank.hint", "Click it with a bucket or tank to fill that");
+        add("gui.actualgenerators.tap.box", "%s \u00b7 depth %s%%");
+        add("gui.actualgenerators.tap.preview.label", "%s \u00b7 %s plates");
+        add("jade.actualgenerators.efficiency", "Efficiency %s%% (heat %s%%)");
         add("gui.actualgenerators.upgrade.installed", "Installed: %s / %s");
         add("gui.actualgenerators.upgrade.next", "→ %s");
         add("gui.actualgenerators.upgrade.maxed", "(max)");
@@ -409,11 +474,15 @@ public class ModLanguageProvider extends LanguageProvider {
         // Jade, when it is installed. The category name is what its own settings screen shows.
         add("config.jade.plugin_actualgenerators.machine", "Machine status");
         add("config.jade.plugin_actualgenerators.logic_port", "Logic Port status");
+        add("config.jade.plugin_actualgenerators.hatch", "Hatch status");
         add("jade.actualgenerators.progress", "Progress: %s%%");
         add("jade.actualgenerators.overclock", "Overclock: %s%% (%sx)");
         add("jade.actualgenerators.warmup", "Warm-up: %s%% (%s%% of rating)");
         add("jade.actualgenerators.tuned", "Tuned to %s Hz");
         add("jade.actualgenerators.calibrating", "Calibrating %s Hz");
+        add("jade.actualgenerators.structure", "%s box, %s per operation");
+        add("jade.actualgenerators.structure.plain", "%s built");
+        add("jade.actualgenerators.unformed", "Not formed");
 
         // JEI, likewise.
         add("jei.actualgenerators.flux_crystal",

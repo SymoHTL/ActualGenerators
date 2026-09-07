@@ -1,0 +1,23 @@
+{
+  "values": [
+    "actualgenerators:corrosion_cell",
+    "actualgenerators:hydrostatic_generator",
+    "actualgenerators:geothermal_tap",
+    "actualgenerators:photovore",
+    "actualgenerators:impact_dynamo",
+    "actualgenerators:spawner_siphon",
+    "actualgenerators:enchantment_combustor",
+    "actualgenerators:surge_bank",
+    "actualgenerators:crystal_charger",
+    "actualgenerators:resonance_crusher",
+    "actualgenerators:logic_port",
+    "actualgenerators:energy_injector",
+    "actualgenerators:machine_casing",
+    "actualgenerators:geothermal_casing",
+    "actualgenerators:item_hatch",
+    "actualgenerators:energy_hatch",
+    "actualgenerators:redstone_hatch",
+    "actualgenerators:fluid_hatch",
+    "actualgenerators:annihilation_furnace"
+  ]
+}

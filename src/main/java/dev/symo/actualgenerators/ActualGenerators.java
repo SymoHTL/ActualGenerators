@@ -1,5 +1,6 @@
 package dev.symo.actualgenerators;
 
+import dev.symo.actualgenerators.registry.ModFluids;
 import com.mojang.logging.LogUtils;
 import dev.symo.actualgenerators.config.ClientConfig;
 import dev.symo.actualgenerators.config.ServerConfig;
@@ -30,6 +31,7 @@ public class ActualGenerators {
 
     // FML injects the mod event bus and the mod container based on the parameter types.
     public ActualGenerators(IEventBus modEventBus, ModContainer modContainer) {
+        ModFluids.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);

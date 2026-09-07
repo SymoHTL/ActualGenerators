@@ -70,6 +70,33 @@ public final class ServerConfig {
     public static final ModConfigSpec.LongValue COMBUSTOR_CAPACITY;
     public static final ModConfigSpec.IntValue COMBUSTOR_TRANSFER;
 
+    public static final ModConfigSpec.IntValue ANNIHILATION_MAX_SIZE;
+    public static final ModConfigSpec.IntValue ANNIHILATION_FE_PER_HARDNESS;
+    public static final ModConfigSpec.LongValue ANNIHILATION_MIN_FE_PER_BLOCK;
+    public static final ModConfigSpec.LongValue ANNIHILATION_MAX_FE_PER_BLOCK;
+    public static final ModConfigSpec.IntValue ANNIHILATION_ITEMS_PER_INTERIOR_BLOCK;
+    public static final ModConfigSpec.IntValue ANNIHILATION_TICKS_PER_OPERATION;
+    public static final ModConfigSpec.LongValue ANNIHILATION_CAPACITY;
+    public static final ModConfigSpec.IntValue ANNIHILATION_TRANSFER;
+    public static final ModConfigSpec.IntValue ANNIHILATION_MIN_HEIGHT;
+    public static final ModConfigSpec.IntValue ANNIHILATION_MAX_HEIGHT;
+    public static final ModConfigSpec.IntValue ANNIHILATION_HEAT_STRONG_PERMILLE;
+    public static final ModConfigSpec.IntValue ANNIHILATION_HEAT_WEAK_PERMILLE;
+    public static final ModConfigSpec.IntValue ANNIHILATION_LOAD_FLOOR_PERMILLE;
+
+    public static final ModConfigSpec.IntValue GEOTHERMAL_FE_PER_TICK;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_MAX_SIZE;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_FULL_DEPTH;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_REACH;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_POCKET_CHANCE;
+    public static final ModConfigSpec.LongValue GEOTHERMAL_POCKET_MIN;
+    public static final ModConfigSpec.LongValue GEOTHERMAL_POCKET_MAX;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_POCKET_REGEN;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_FE_PER_CORIUM_MB;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_TANK;
+    public static final ModConfigSpec.LongValue GEOTHERMAL_CAPACITY;
+    public static final ModConfigSpec.IntValue GEOTHERMAL_TRANSFER;
+
     public static final ModConfigSpec.IntValue CRUSHER_FE_PER_TICK;
     public static final ModConfigSpec.IntValue CRUSHER_TICKS;
     public static final ModConfigSpec.IntValue CRUSHER_CALIBRATION_MULTIPLIER;
@@ -343,6 +370,97 @@ public final class ServerConfig {
 
         BUILDER.comment("FE/t each face may move, before energy upgrades.");
         COMBUSTOR_TRANSFER = BUILDER.defineInRange("transferRate", 1_000, 0, Integer.MAX_VALUE);
+
+        BUILDER.pop();
+
+        BUILDER.push("annihilation_furnace");
+
+        BUILDER.comment(
+                "The widest and deepest the box may be, outer casing to outer casing. The interior",
+                "volume is the items per operation. A bigger limit is a bigger walk when a casing",
+                "changes -- there is no other cost.");
+        ANNIHILATION_MAX_SIZE = BUILDER.defineInRange("maxSize", 7, 3, 15);
+
+        BUILDER.comment(
+                "The shortest and tallest the box may be. It is a tall furnace: the heat is on the",
+                "floor and the work is stacked above it, so 3x7x3 is the smallest that runs.");
+        ANNIHILATION_MIN_HEIGHT = BUILDER.defineInRange("minHeight", 7, 3, 15);
+        ANNIHILATION_MAX_HEIGHT = BUILDER.defineInRange("maxHeight", 15, 3, 15);
+
+        BUILDER.comment(
+                "Heat, in thousandths, from a source block of Corium (actualgenerators:annihilation_heat/strong)",
+                "or of lava (annihilation_heat/weak) on one floor block. The floor's heat is the average over it,",
+                "and every item pays heat times load out of its worth. No heat, nothing burns.");
+        ANNIHILATION_HEAT_STRONG_PERMILLE = BUILDER.defineInRange("heatStrongPermille", 1000, 0, 1000);
+        ANNIHILATION_HEAT_WEAK_PERMILLE = BUILDER.defineInRange("heatWeakPermille", 400, 0, 1000);
+
+        BUILDER.comment(
+                "Load, in thousandths, with the slots stuffed full. Up to one batch held the load is a thousand;",
+                "past that it falls in a straight line to this. Keep the slots at the batch and nothing is lost.");
+        ANNIHILATION_LOAD_FLOOR_PERMILLE = BUILDER.defineInRange("loadFloorPermille", 250, 0, 1000);
+
+        BUILDER.comment(
+                "FE per point of block hardness. Cobblestone is 2.0, deepslate 3.0, obsidian 50.0;",
+                "the block's own hardness is its mass, so a pack's blocks need no recipe.");
+        ANNIHILATION_FE_PER_HARDNESS = BUILDER.defineInRange("energyPerHardness", 20_000, 0, 100_000_000);
+
+        BUILDER.comment("The least a block is worth, whatever its hardness. Torches and saplings land here.");
+        ANNIHILATION_MIN_FE_PER_BLOCK = BUILDER.defineInRange("minEnergyPerBlock", 10_000L, 0L, Long.MAX_VALUE);
+
+        BUILDER.comment("The most a block is worth. Obsidian, netherite and ancient debris land here.");
+        ANNIHILATION_MAX_FE_PER_BLOCK = BUILDER.defineInRange("maxEnergyPerBlock", 1_000_000L, 0L, Long.MAX_VALUE);
+
+        BUILDER.comment("Items one operation eats per block of air inside the shell.");
+        ANNIHILATION_ITEMS_PER_INTERIOR_BLOCK = BUILDER.defineInRange("itemsPerInteriorBlock", 1, 1, 64);
+
+        BUILDER.comment("Ticks one operation takes, whatever its size. The FE for the lot is paid out evenly over them.");
+        ANNIHILATION_TICKS_PER_OPERATION = BUILDER.defineInRange("ticksPerOperation", 40, 1, 72000);
+
+        BUILDER.comment("Internal FE buffer per block of interior.");
+        ANNIHILATION_CAPACITY = BUILDER.defineInRange("capacityPerInteriorBlock", 1_000_000L, 0L, Long.MAX_VALUE);
+
+        BUILDER.comment("FE/t each energy hatch may hand out, per block of interior.");
+        ANNIHILATION_TRANSFER = BUILDER.defineInRange("transferRatePerInteriorBlock", 10_000, 0, Integer.MAX_VALUE);
+
+        BUILDER.pop();
+
+        BUILDER.push("geothermal_tap");
+
+        BUILDER.comment(
+                "FE/t per block of Geothermal Casing in the plate, at full depth with heat in the pocket,",
+                "before the warm-up ramp. The smallest plate is 5x5.");
+        GEOTHERMAL_FE_PER_TICK = BUILDER.defineInRange("energyPerTick", 20, 0, 1_000_000);
+
+        BUILDER.comment("The widest the plate may be on a side. Odd, so the cap sits centred; an even value rounds down.");
+        GEOTHERMAL_MAX_SIZE = BUILDER.defineInRange("maxSize", 15, 5, 31);
+
+        BUILDER.comment(
+                "How the rating falls off with height above the world floor: full within fullDepth",
+                "blocks of it, nothing at reach blocks or more, a straight line between.");
+        GEOTHERMAL_FULL_DEPTH = BUILDER.defineInRange("fullDepth", 8, 0, 384);
+        GEOTHERMAL_REACH = BUILDER.defineInRange("reach", 48, 1, 384);
+
+        BUILDER.comment(
+                "The heat pocket under a chunk, rolled once per chunk from the world seed: the chance",
+                "there is one at all, in percent, and the FE it holds when there is.");
+        GEOTHERMAL_POCKET_CHANCE = BUILDER.defineInRange("pocketChancePercent", 60, 0, 100);
+        GEOTHERMAL_POCKET_MIN = BUILDER.defineInRange("pocketMinEnergy", 500_000_000L, 0L, Long.MAX_VALUE);
+        GEOTHERMAL_POCKET_MAX = BUILDER.defineInRange("pocketMaxEnergy", 2_000_000_000L, 0L, Long.MAX_VALUE);
+
+        BUILDER.comment("FE a pocket regrows per tick, worked out when something draws on it. Nothing ticks.");
+        GEOTHERMAL_POCKET_REGEN = BUILDER.defineInRange("pocketRegenPerTick", 50, 0, 1_000_000);
+
+        BUILDER.comment(
+                "FE made per millibucket of Corium left in the tank, and the tank's size per block of",
+                "plate. A full tank collects no more.");
+        GEOTHERMAL_FE_PER_CORIUM_MB = BUILDER.defineInRange("energyPerCoriumMillibucket", 100_000, 1, Integer.MAX_VALUE);
+        GEOTHERMAL_TANK = BUILDER.defineInRange("tankCapacity", 8_000, 1_000, Integer.MAX_VALUE);
+
+        BUILDER.comment("Internal FE buffer per block of plate.");
+        GEOTHERMAL_CAPACITY = BUILDER.defineInRange("capacity", 40_000L, 0L, Long.MAX_VALUE);
+
+        BUILDER.comment("FE/t each energy hatch may move, per block of plate.");
+        GEOTHERMAL_TRANSFER = BUILDER.defineInRange("transferRate", 400, 0, Integer.MAX_VALUE);
 
         BUILDER.pop();
 

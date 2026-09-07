@@ -22,6 +22,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.CORROSION_CELL.get());
         dropSelf(ModBlocks.HYDROSTATIC_GENERATOR.get());
+        dropSelf(ModBlocks.GEOTHERMAL_TAP.get());
         dropSelf(ModBlocks.PHOTOVORE.get());
         dropSelf(ModBlocks.IMPACT_DYNAMO.get());
         dropSelf(ModBlocks.SPAWNER_SIPHON.get());
@@ -31,6 +32,13 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.CRYSTAL_CHARGER.get());
         dropSelf(ModBlocks.RESONANCE_CRUSHER.get());
         dropSelf(ModBlocks.LOGIC_PORT.get());
+        dropSelf(ModBlocks.MACHINE_CASING.get());
+        dropSelf(ModBlocks.GEOTHERMAL_CASING.get());
+        dropSelf(ModBlocks.ITEM_HATCH.get());
+        dropSelf(ModBlocks.ENERGY_HATCH.get());
+        dropSelf(ModBlocks.REDSTONE_HATCH.get());
+        dropSelf(ModBlocks.FLUID_HATCH.get());
+        dropSelf(ModBlocks.ANNIHILATION_FURNACE.get());
     }
 
     @Override

@@ -1,5 +1,7 @@
 package dev.symo.actualgenerators.client;
 
+import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.fluids.FluidStack;
 import dev.symo.actualgenerators.ActualGenerators;
 import dev.symo.actualgenerators.item.TierUpgradeItem;
 import dev.symo.actualgenerators.machine.IoMode;
@@ -76,6 +78,12 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
 
     protected static final int READOUT_COLOUR = 0x404040;
 
+    /** The frame round a gauge or a tank, one pixel larger than the fill all round. */
+    protected static final int GAUGE_FRAME_U = 208;
+    protected static final int GAUGE_FRAME_V = 16;
+    protected static final int GAUGE_FRAME_WIDTH = 18;
+    protected static final int GAUGE_FRAME_HEIGHT = 55;
+
     // The plain-text lines down the left of a window with no item slots to fill it.
     private static final int TEXT_X = 12;
     private static final int FIRST_LINE_Y = 26;
@@ -104,8 +112,18 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
     private boolean sideConfigOpen;
     private TransferKind selectedKind = TransferKind.ITEM;
 
+    /** The kind whose faces the panel shows: the first the machine moves, until a tab is picked. */
+    private TransferKind selectedKind() {
+        if (!menu.supportsKind(selectedKind)) {
+            List<TransferKind> kinds = menu.sideKinds();
+            selectedKind = kinds.isEmpty() ? TransferKind.ENERGY : kinds.get(0);
+        }
+        return selectedKind;
+    }
+
     protected MachineScreen(M menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        sideConfigOpen = menu.sidePanelOpenAtStart();
         this.imageWidth = MachineLayout.WIDTH;
         this.imageHeight = MachineLayout.HEIGHT;
         // Clear of the upgrade row, which ends at 96.
@@ -149,6 +167,9 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
 
         renderSlotFrames(graphics);
         renderEnergyBar(graphics);
+        if (menu.hasTank()) {
+            renderTank(graphics);
+        }
         if (menu.hasRamp()) {
             renderOverclockBar(graphics);
         }
@@ -159,8 +180,10 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
 
         drawButton(graphics, leftPos + REDSTONE_BUTTON_X, topPos + REDSTONE_BUTTON_Y,
                 redstoneColour(), mouseX, mouseY);
-        drawButton(graphics, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y,
-                sideConfigOpen ? 0xFF6FA8DC : 0xFF8B8B8B, mouseX, mouseY);
+        if (menu.hasSideConfig()) {
+            drawButton(graphics, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y,
+                    sideConfigOpen ? 0xFF6FA8DC : 0xFF8B8B8B, mouseX, mouseY);
+        }
         if (menu.hasModeButton()) {
             drawButton(graphics, leftPos + MODE_BUTTON_X, topPos + MODE_BUTTON_Y, modeColour(), mouseX, mouseY);
         }
@@ -180,6 +203,32 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
     protected void renderMachineExtras(GuiGraphics graphics) {
     }
 
+    /** The tank beside the gauge: the fluid's own sprite, filled from the bottom, in the gauge's frame. */
+    protected void renderTank(GuiGraphics graphics) {
+        MachineLayout.Box tank = MachineLayout.TANK_FILL;
+        graphics.blit(texture(), leftPos + tank.x() - 1, topPos + tank.y() - 1,
+                GAUGE_FRAME_U, GAUGE_FRAME_V, GAUGE_FRAME_WIDTH, GAUGE_FRAME_HEIGHT);
+        FluidStack fluid = menu.tankFluid();
+        int capacity = menu.tankCapacity();
+        if (fluid.isEmpty() || capacity <= 0) {
+            return;
+        }
+        int filled = Math.max(1, (int) (tank.height() * Math.clamp(fluid.getAmount() / (double) capacity, 0.0, 1.0)));
+        Chrome.drawFluidColumn(graphics, fluid, leftPos + tank.x(), topPos + tank.y() + tank.height() - filled,
+                tank.width(), filled);
+    }
+
+    /** What the tank holds, and that a container on the cursor fills from it. */
+    protected List<FormattedCharSequence> tankTooltip() {
+        FluidStack fluid = menu.tankFluid();
+        Component line = fluid.isEmpty()
+                ? Component.translatable("gui.actualgenerators.tank.empty", formatNumber(menu.tankCapacity()))
+                : Component.translatable("gui.actualgenerators.tank", fluid.getHoverName(),
+                        formatNumber(fluid.getAmount()), formatNumber(menu.tankCapacity()));
+        return List.of(line.getVisualOrderText(),
+                Component.translatable("gui.actualgenerators.tank.hint").withStyle(ChatFormatting.GRAY).getVisualOrderText());
+    }
+
     /**
      * Machine-specific hover text.
      *
@@ -193,6 +242,8 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
             graphics.renderTooltip(font, tierTooltip(), mouseX, mouseY);
         } else if (isOver(mouseX, mouseY, leftPos + ENERGY_X, topPos + ENERGY_Y, ENERGY_WIDTH, ENERGY_HEIGHT)) {
             graphics.renderTooltip(font, energyTooltip(), mouseX, mouseY);
+        } else if (menu.hasTank() && Chrome.isOver(mouseX, mouseY, leftPos, topPos, MachineLayout.TANK_FILL)) {
+            graphics.renderTooltip(font, tankTooltip(), mouseX, mouseY);
         } else if (menu.hasRamp()
                 && isOver(mouseX, mouseY, leftPos + OVERCLOCK_X, topPos + OVERCLOCK_Y, OVERCLOCK_WIDTH, OVERCLOCK_HEIGHT)) {
             graphics.renderTooltip(font, rampTooltip(), mouseX, mouseY);
@@ -201,7 +252,8 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
                             Component.translatable("gui.actualgenerators.redstone",
                                     Component.translatable(redstoneKey())).getVisualOrderText()),
                     mouseX, mouseY);
-        } else if (isOver(mouseX, mouseY, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
+        } else if (menu.hasSideConfig()
+                && isOver(mouseX, mouseY, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
             graphics.renderTooltip(font, List.of(
                     Component.translatable("gui.actualgenerators.side_config").getVisualOrderText()), mouseX, mouseY);
         } else if (menu.hasModeButton()
@@ -567,10 +619,12 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
         graphics.fill(x - 1, y - 1, x + PANEL_WIDTH + 1, y + PANEL_HEIGHT + 1, 0xFF373737);
         graphics.fill(x, y, x + PANEL_WIDTH, y + PANEL_HEIGHT, 0xFFC6C6C6);
 
-        // Resource kind tabs.
-        for (TransferKind kind : TransferKind.material()) {
-            int tabX = x + 2 + kind.ordinal() * 20;
-            boolean active = kind == selectedKind;
+        // Resource kind tabs: only the kinds this machine moves.
+        List<TransferKind> kinds = menu.sideKinds();
+        for (int tab = 0; tab < kinds.size(); tab++) {
+            TransferKind kind = kinds.get(tab);
+            int tabX = x + 2 + tab * 20;
+            boolean active = kind == selectedKind();
             graphics.fill(tabX, y + 2, tabX + 18, y + 16, active ? 0xFF6FA8DC : 0xFF8B8B8B);
             graphics.drawString(font, kindLabel(kind), tabX + 6, y + 5, active ? 0xFFFFFF : 0x404040, false);
         }
@@ -580,18 +634,27 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
             int[] cell = faceCell(side);
             int faceX = x + 4 + cell[0] * FACE_SIZE;
             int faceY = y + 20 + cell[1] * FACE_SIZE;
-            IoMode mode = menu.sideMode(selectedKind, side);
+            IoMode mode = menu.sideMode(selectedKind(), side);
+            boolean blocked = menu.sideBlocked(side);
 
             graphics.fill(faceX, faceY, faceX + FACE_SIZE - 1, faceY + FACE_SIZE - 1, 0xFF373737);
-            graphics.fill(faceX + 1, faceY + 1, faceX + FACE_SIZE - 2, faceY + FACE_SIZE - 2, modeColour(mode));
-            graphics.drawString(font, faceLabel(side), faceX + 5, faceY + 5, 0x202020, false);
+            if (blocked) {
+                graphics.fill(faceX + 1, faceY + 1, faceX + FACE_SIZE - 2, faceY + FACE_SIZE - 2, BLOCKED_COLOUR);
+            } else {
+                fillMode(graphics, faceX + 1, faceY + 1, faceX + FACE_SIZE - 2, faceY + FACE_SIZE - 2, mode);
+            }
+            graphics.drawString(font, faceLabel(side), faceX + 5, faceY + 5, blocked ? 0x707070 : 0x202020, false);
 
             if (isOver(mouseX, mouseY, faceX, faceY, FACE_SIZE, FACE_SIZE)) {
-                graphics.fill(faceX + 1, faceY + 1, faceX + FACE_SIZE - 2, faceY + FACE_SIZE - 2, 0x40FFFFFF);
+                if (!blocked) {
+                    graphics.fill(faceX + 1, faceY + 1, faceX + FACE_SIZE - 2, faceY + FACE_SIZE - 2, 0x40FFFFFF);
+                }
                 List<net.minecraft.util.FormattedCharSequence> tooltip = new ArrayList<>();
                 tooltip.add(Component.translatable("gui.actualgenerators.side." + side.name().toLowerCase(java.util.Locale.ROOT))
                         .getVisualOrderText());
-                tooltip.add(Component.translatable("gui.actualgenerators.mode." + mode.name().toLowerCase(java.util.Locale.ROOT))
+                tooltip.add((blocked
+                        ? Component.translatable("gui.actualgenerators.side.blocked").withStyle(ChatFormatting.DARK_GRAY)
+                        : Component.translatable("gui.actualgenerators.mode." + mode.name().toLowerCase(java.util.Locale.ROOT)))
                         .getVisualOrderText());
                 graphics.renderTooltip(font, tooltip, mouseX, mouseY);
             }
@@ -610,7 +673,7 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
         for (boolean push : new boolean[]{false, true}) {
             int buttonX = autoLeft(x, push);
             int buttonY = y + AUTO_Y;
-            boolean on = menu.autoEnabled(selectedKind, push);
+            boolean on = menu.autoEnabled(selectedKind(), push);
 
             graphics.fill(buttonX, buttonY, buttonX + AUTO_WIDTH, buttonY + AUTO_HEIGHT, 0xFF373737);
             graphics.fill(buttonX + 1, buttonY + 1, buttonX + AUTO_WIDTH - 1, buttonY + AUTO_HEIGHT - 1,
@@ -656,13 +719,39 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
         };
     }
 
+    private static final int INPUT_COLOUR = 0xFF3E9BD8;
+    private static final int OUTPUT_COLOUR = 0xFFD8813E;
+    private static final int BLOCKED_COLOUR = 0xFF4A4A4A;
+
     private static int modeColour(IoMode mode) {
         return switch (mode) {
             case DISABLED -> 0xFF8B8B8B;
-            case INPUT -> 0xFF3E9BD8;
-            case OUTPUT -> 0xFFD8813E;
-            case BOTH -> 0xFF5EAC8D;
+            case INPUT -> INPUT_COLOUR;
+            case OUTPUT -> OUTPUT_COLOUR;
+            case BOTH -> INPUT_COLOUR;
         };
+    }
+
+    /**
+     * A face in its mode's colour; "both" is the two colours split along the diagonal, input in
+     * the upper right and output in the lower left, the same split the markers on a hatch wear.
+     */
+    private static void fillMode(GuiGraphics graphics, int x0, int y0, int x1, int y1, IoMode mode) {
+        if (mode != IoMode.BOTH) {
+            graphics.fill(x0, y0, x1, y1, modeColour(mode));
+            return;
+        }
+        int width = x1 - x0;
+        int height = y1 - y0;
+        for (int row = 0; row < height; row++) {
+            int split = x0 + width * row / Math.max(height - 1, 1);
+            if (split > x0) {
+                graphics.fill(x0, y0 + row, split, y0 + row + 1, OUTPUT_COLOUR);
+            }
+            if (split < x1) {
+                graphics.fill(split, y0 + row, x1, y0 + row + 1, INPUT_COLOUR);
+            }
+        }
     }
 
     private static String kindLabel(TransferKind kind) {
@@ -693,12 +782,19 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
             pressButton(MachineMenu.BUTTON_CYCLE_REDSTONE);
             return true;
         }
+        if (menu.hasTank() && !menu.getCarried().isEmpty()
+                && Chrome.isOver(mouseX, mouseY, leftPos, topPos, MachineLayout.TANK_FILL)) {
+            // A container on the cursor, on the tank: the server fills or empties it.
+            pressButton(MachineMenu.BUTTON_TANK);
+            return true;
+        }
         if (menu.hasModeButton()
                 && isOver(mouseX, mouseY, leftPos + MODE_BUTTON_X, topPos + MODE_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
             pressButton(MachineMenu.BUTTON_TOGGLE_MODE);
             return true;
         }
-        if (isOver(mouseX, mouseY, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
+        if (menu.hasSideConfig()
+                && isOver(mouseX, mouseY, leftPos + CONFIG_BUTTON_X, topPos + CONFIG_BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)) {
             sideConfigOpen = !sideConfigOpen;
             playClick();
             return true;
@@ -713,8 +809,10 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
         int x = panelLeft();
         int y = panelTop();
 
-        for (TransferKind kind : TransferKind.material()) {
-            int tabX = x + 2 + kind.ordinal() * 20;
+        List<TransferKind> kinds = menu.sideKinds();
+        for (int tab = 0; tab < kinds.size(); tab++) {
+            TransferKind kind = kinds.get(tab);
+            int tabX = x + 2 + tab * 20;
             if (isOver(mouseX, mouseY, tabX, y + 2, 18, 14)) {
                 selectedKind = kind;
                 playClick();
@@ -727,28 +825,30 @@ public abstract class MachineScreen<M extends MachineMenu<?>> extends AbstractCo
             int faceX = x + 4 + cell[0] * FACE_SIZE;
             int faceY = y + 20 + cell[1] * FACE_SIZE;
             if (isOver(mouseX, mouseY, faceX, faceY, FACE_SIZE, FACE_SIZE)) {
-                pressButton(MachineMenu.BUTTON_SIDES_START + selectedKind.ordinal() * 6 + side.ordinal());
+                if (!menu.sideBlocked(side)) {
+                    pressButton(MachineMenu.BUTTON_SIDES_START + selectedKind().ordinal() * 6 + side.ordinal());
+                }
                 return true;
             }
         }
 
         for (boolean push : new boolean[]{false, true}) {
             if (isOver(mouseX, mouseY, autoLeft(x, push), y + AUTO_Y, AUTO_WIDTH, AUTO_HEIGHT)) {
-                pressButton(MachineMenu.BUTTON_AUTO_START + selectedKind.ordinal() * 2 + (push ? 1 : 0));
+                pressButton(MachineMenu.BUTTON_AUTO_START + selectedKind().ordinal() * 2 + (push ? 1 : 0));
                 return true;
             }
         }
         return false;
     }
 
-    private void pressButton(int id) {
+    void pressButton(int id) {
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
             playClick();
         }
     }
 
-    private void playClick() {
+    protected void playClick() {
         if (minecraft != null) {
             minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                     net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1.0F));

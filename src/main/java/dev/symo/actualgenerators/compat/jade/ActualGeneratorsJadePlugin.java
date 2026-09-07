@@ -1,5 +1,7 @@
 package dev.symo.actualgenerators.compat.jade;
 
+import dev.symo.actualgenerators.machine.multiblock.HatchBlockEntity;
+import dev.symo.actualgenerators.machine.multiblock.HatchBlock;
 import dev.symo.actualgenerators.logistics.LinkPortBlock;
 import dev.symo.actualgenerators.logistics.LinkPortBlockEntity;
 import dev.symo.actualgenerators.machine.MachineBlock;
@@ -24,12 +26,14 @@ public class ActualGeneratorsJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(MachineStatusProvider.INSTANCE, MachineBlockEntity.class);
+        registration.registerBlockDataProvider(HatchStatusProvider.INSTANCE, HatchBlockEntity.class);
         registration.registerBlockDataProvider(LinkPortStatusProvider.INSTANCE, LinkPortBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(MachineStatusProvider.INSTANCE, MachineBlock.class);
+        registration.registerBlockComponent(HatchStatusProvider.INSTANCE, HatchBlock.class);
         registration.registerBlockComponent(LinkPortStatusProvider.INSTANCE, LinkPortBlock.class);
     }
 }

@@ -330,7 +330,7 @@ public final class LinkOverlayRenderer {
     }
 
     /** A name tag's way of putting text in the world: faces the camera; through walls or not as asked. */
-    private static void label(PoseStack pose, MultiBufferSource buffers, Font font, Camera camera, Vec3 cam,
+    static void label(PoseStack pose, MultiBufferSource buffers, Font font, Camera camera, Vec3 cam,
                               Vec3 at, Component text, int colour, Font.DisplayMode mode) {
         pose.pushPose();
         pose.translate(at.x - cam.x, at.y - cam.y, at.z - cam.z);

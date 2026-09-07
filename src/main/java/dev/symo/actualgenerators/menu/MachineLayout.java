@@ -1,5 +1,7 @@
 package dev.symo.actualgenerators.menu;
 
+import java.util.Locale;
+import dev.symo.actualgenerators.machine.multiblock.MultiblockControllerBlockEntity;
 import java.util.List;
 
 /**
@@ -44,6 +46,8 @@ public final class MachineLayout {
     public static final Box ENERGY_FILL = new Box("energy bar", 152, 18, 12, 53);
     public static final Box OVERCLOCK_FILL = new Box("overclock bar", 84, 78, 46, 16);
     public static final Box GAUGE_FILL = new Box("gauge", 130, 18, 16, 53);
+    /** A fluid tank the same shape as the gauge, to its left, for the machines that hold one. */
+    public static final Box TANK_FILL = new Box("tank", 108, 18, 16, 53);
 
     /** The left-to-right progress arrow, where a machine that has one draws it. */
     public static final Box PROGRESS_ARROW = new Box("progress arrow", 69, 36, 24, 13);
@@ -51,6 +55,19 @@ public final class MachineLayout {
     /** Buttons draw their own border, so these are already the full extent. */
     public static final Box REDSTONE_BUTTON = new Box("redstone button", 151, 77, 18, 18);
     public static final Box CONFIG_BUTTON = new Box("side config button", 133, 77, 18, 18);
+
+    /**
+     * The bottom row of a multiblock controller's window, left of the redstone button: the preview
+     * button and the three size steppers before the box stands. It covers the ramp bar, so a
+     * controller shows one or the other.
+     */
+    public static final Box MULTIBLOCK_ROW = new Box("multiblock row", 8, 77, 124, 18);
+    public static final Box PREVIEW_BUTTON = new Box("preview button", 8, 77, 18, 18);
+
+    /** One size stepper: a letter, the number, and two arrows. */
+    public static Box stepper(MultiblockControllerBlockEntity.Extent extent) {
+        return new Box(extent.name().toLowerCase(Locale.ROOT) + " stepper", 28 + extent.ordinal() * 35, 77, 33, 18);
+    }
     public static final Box MODE_BUTTON = new Box("mode button", 115, 77, 18, 18);
 
     /** Everything every machine window draws, whatever machine it belongs to. */
@@ -76,6 +93,11 @@ public final class MachineLayout {
     /** The tall gauge, drawn only by generator windows that have a level worth showing. */
     public static Box gauge() {
         return GAUGE_FILL.grow(1);
+    }
+
+    /** The tank, drawn only by machines that hold a fluid. */
+    public static Box tank() {
+        return TANK_FILL.grow(1);
     }
 
     /** The frame a slot draws, which is one pixel bigger than the 16x16 slot on every side. */

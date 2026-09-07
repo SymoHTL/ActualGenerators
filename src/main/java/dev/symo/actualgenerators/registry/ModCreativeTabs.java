@@ -22,10 +22,20 @@ public final class ModCreativeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.CORROSION_CELL.get());
                         output.accept(ModItems.HYDROSTATIC_GENERATOR.get());
+                        output.accept(ModItems.GEOTHERMAL_TAP.get());
+                        output.accept(ModItems.CORIUM_BUCKET.get());
+                        output.accept(ModItems.THERMAL_PROBE.get());
                         output.accept(ModItems.PHOTOVORE.get());
                         output.accept(ModItems.IMPACT_DYNAMO.get());
                         output.accept(ModItems.SPAWNER_SIPHON.get());
                         output.accept(ModItems.ENCHANTMENT_COMBUSTOR.get());
+                        output.accept(ModItems.ANNIHILATION_FURNACE.get());
+                        output.accept(ModItems.MACHINE_CASING.get());
+                        output.accept(ModItems.GEOTHERMAL_CASING.get());
+                        output.accept(ModItems.ITEM_HATCH.get());
+                        output.accept(ModItems.ENERGY_HATCH.get());
+                        output.accept(ModItems.REDSTONE_HATCH.get());
+                        output.accept(ModItems.FLUID_HATCH.get());
                         output.accept(ModItems.RESONANCE_CRUSHER.get());
                         output.accept(ModItems.ENERGY_INJECTOR.get());
                         output.accept(ModItems.SURGE_BANK.get());

@@ -1,0 +1,8 @@
+{
+  "loader": "actualgenerators:connected_casing",
+  "textures": {
+    "frame": "actualgenerators:block/item_hatch_formed",
+    "panel": "actualgenerators:block/machine_casing_panel",
+    "particle": "actualgenerators:block/item_hatch_formed"
+  }
+}

@@ -25,10 +25,6 @@ public abstract class GeneratorScreen<M extends MachineMenu<?>> extends MachineS
     protected static final int GAUGE_WIDTH = MachineLayout.GAUGE_FILL.width();
     protected static final int GAUGE_HEIGHT = MachineLayout.GAUGE_FILL.height();
 
-    private static final int GAUGE_FRAME_U = 208;
-    private static final int GAUGE_FRAME_V = 16;
-    private static final int GAUGE_FRAME_WIDTH = 18;
-    private static final int GAUGE_FRAME_HEIGHT = 55;
 
     protected GeneratorScreen(M menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

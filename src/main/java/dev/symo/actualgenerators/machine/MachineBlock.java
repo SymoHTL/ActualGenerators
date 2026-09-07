@@ -1,5 +1,11 @@
 package dev.symo.actualgenerators.machine;
 
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -71,6 +77,34 @@ public abstract class MachineBlock extends BaseEntityBlock {
                 machine.serverTick(serverLevel, pos, tickState);
             }
         };
+    }
+
+    /**
+     * A bucket or any other fluid container used on a machine with a tank fills or empties it
+     * before the window opens; on everything else, and when nothing could move, the click falls
+     * through to the window. The tank's own faces decide which way fluid may go.
+     */
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack,
+                                              BlockState state,
+                                              Level level,
+                                              BlockPos pos,
+                                              Player player,
+                                              InteractionHand hand,
+                                              BlockHitResult hit) {
+        if (stack.getCapability(Capabilities.FluidHandler.ITEM) != null
+                && level.getBlockEntity(pos) instanceof MachineBlockEntity machine) {
+            IFluidHandler tank = machine.fluidsForSide(null);
+            if (tank != null) {
+                if (level.isClientSide) {
+                    return ItemInteractionResult.SUCCESS;
+                }
+                if (FluidUtil.interactWithFluidHandler(player, hand, tank)) {
+                    return ItemInteractionResult.CONSUME;
+                }
+            }
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
     /**
